@@ -4,7 +4,7 @@ Bundle-Name: MakeTargeter Plug-in
 Bundle-SymbolicName: maketargeter;singleton:=true
 Bundle-Version: 0.2.0
 Bundle-Vendor: Mikhail Barg
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.4.0",
  org.eclipse.ui;bundle-version="3.4.0",
  org.eclipse.core.resources;bundle-version="3.4.0",
