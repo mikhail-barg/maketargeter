@@ -6,7 +6,7 @@
       <view
             allowMultiple="false"
             category="org.eclipse.cdt.make.ui"
-            class="maketargeter.MTView"
+            class="maketargeter.MainView"
             icon="icons/main.gif"
             id="MakeTargeter.view"
             name="Make Targeter"
