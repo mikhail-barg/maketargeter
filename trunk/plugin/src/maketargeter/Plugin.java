@@ -1,13 +1,18 @@
 package maketargeter;
 
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class Plugin extends AbstractUIPlugin
 {
 
+	/////////////////////////////////////////////////////////////
 	public static final String MT_TARGETS_FILE_NAME = "make.targets";
 
 	public static final String MT_XML_ROOT_ELEMENT_NAME = "makeTargetsDescription";
@@ -32,21 +37,22 @@ public class Plugin extends AbstractUIPlugin
 
 	private static Plugin m_plugin;
 
+	/////////////////////////////////////////////////////////////
 	public Plugin()
 	{
 		if (m_plugin != null)
 		{
-			throw new IllegalStateException("Tryin to initialize second instance of singleton plugin");
+			throw new IllegalStateException("Trying to initialize second instance of singleton plugin");
 		}
 		m_plugin = this;
 	}
 
-	public static Plugin getInstance()
+	static Plugin getInstance()
 	{
 		return m_plugin;
 	}
 
-	public static ImageDescriptor getImage(String path)
+	static ImageDescriptor getImage(String path)
 	{
 		URL url = null;
 
@@ -58,5 +64,90 @@ public class Plugin extends AbstractUIPlugin
 		{
 		}
 		return ImageDescriptor.createFromURL(url);
+	}
+
+	/////////////////////////////////////////////////////////////
+	
+	private final List<MainView> m_views = new LinkedList<MainView>();
+	private IProject m_currentProject;
+	private String m_targetString = "";
+	
+
+	/**
+	 * @return currently selected project. Can be null;
+	 */
+	IProject getCurrentProject()
+	{
+		return m_currentProject;
+	}
+	
+	/**
+	 * Sets a new current project
+	 * @param project
+	 * @return true if given project and previously seletced are both not null and different 
+	 */
+	boolean setCurrentProject(IProject project)
+	{
+		if (m_currentProject == null && project == null)
+		{
+			return false;
+		}
+		if (m_currentProject != null && m_currentProject.equals(project))
+		{
+			return false;
+		}
+	
+		m_currentProject = project;
+		
+		updateViews();
+		
+		return true;
+	}
+	
+	boolean isCurrentProjectOpened()
+	{
+		return Util.checkProjectOpen(m_currentProject);
+	}
+	
+	/**
+	 * @return file handle of a resource file. Can be null.
+	 */
+	IFile getTragetsFile()
+	{
+		if (!isCurrentProjectOpened())
+		{
+			// bad project.. probably already closed or something
+			return null;
+		}
+
+		return m_currentProject.getFile(Plugin.MT_TARGETS_FILE_NAME);
+	}
+
+	void registerView(MainView view)
+	{
+		m_views.add(view);
+	}
+	
+	void removeView(MainView view)
+	{
+		m_views.remove(view);
+	}
+	
+	void updateViews()
+	{
+		for (MainView view : m_views)
+		{
+			view.update();
+		}
+	}
+	
+	String getTargetString()
+	{
+		return m_targetString;
+	}
+	
+	void setTargetString(String string)
+	{
+		m_targetString = string;
 	}
 }

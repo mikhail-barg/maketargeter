@@ -3,40 +3,18 @@
  */
 package maketargeter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
-import org.eclipse.cdt.make.core.IMakeTarget;
-import org.eclipse.cdt.make.core.IMakeTargetManager;
-import org.eclipse.cdt.make.core.MakeCorePlugin;
-import org.eclipse.cdt.make.ui.TargetBuild;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -44,12 +22,9 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ColumnLayout;
@@ -58,7 +33,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.ViewPart;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -69,7 +43,7 @@ import org.xml.sax.SAXException;
  * @author Mikhail Barg
  * 
  */
-public class MainView extends ViewPart implements ISelectionListener
+public class MainView extends ViewPart
 {
 	private static final int SECTION_STYLE = ExpandableComposite.TWISTIE
 												| ExpandableComposite.TITLE_BAR 
@@ -80,7 +54,6 @@ public class MainView extends ViewPart implements ISelectionListener
 	
 	private FormToolkit m_toolkit;
 	private ScrolledForm m_form;
-	private IProject m_project;
 
 	private Group m_targetsGroup;
 	private Group m_optionsGroup;
@@ -91,16 +64,12 @@ public class MainView extends ViewPart implements ISelectionListener
 
 	private SelectionListener m_selectionListener;
 
-	private String m_targetString = "";
-
 	private List<Button> m_optionButtonsList;
 	private List<Composite> m_optionGroupsList;
 
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		m_project = null;
-
 		initToolBar(parent.getShell());
 
 		m_toolkit = new FormToolkit(parent.getDisplay());
@@ -109,48 +78,54 @@ public class MainView extends ViewPart implements ISelectionListener
 		m_form.getBody().setLayout(new ColumnLayout());
 
 		//targets section
-		final Section targetsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
-		targetsSection.setText("Targets");
-		targetsSection.addExpansionListener(new ExpansionAdapter()
-			{
-				@Override
-				public void expansionStateChanged(ExpansionEvent e)
+		{
+			final Section targetsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
+			targetsSection.setText("Targets");
+			targetsSection.addExpansionListener(new ExpansionAdapter()
 				{
-					m_form.reflow(true);
-				}
-			});
-		targetsSection.setExpanded(true);
-
-		m_targetsGroup = new Group(targetsSection, GROUP_STYLE);
-		m_targetsGroup.setLayout(new RowLayout(SWT.VERTICAL));
-		m_toolkit.adapt(m_targetsGroup);
-		targetsSection.setClient(m_targetsGroup);
+					@Override
+					public void expansionStateChanged(ExpansionEvent e)
+					{
+						m_form.reflow(true);
+					}
+				});
+			targetsSection.setExpanded(true);
+	
+			m_targetsGroup = new Group(targetsSection, GROUP_STYLE);
+			m_targetsGroup.setLayout(new RowLayout(SWT.VERTICAL));
+			m_toolkit.adapt(m_targetsGroup);
+			targetsSection.setClient(m_targetsGroup);
+		}
 
 		//Options section
-		final Section optionsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
-		optionsSection.setText("Options");
-		optionsSection.addExpansionListener(new ExpansionAdapter()
-			{
-				@Override
-				public void expansionStateChanged(ExpansionEvent e)
+		{
+			final Section optionsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
+			optionsSection.setText("Options");
+			optionsSection.addExpansionListener(new ExpansionAdapter()
 				{
-					m_form.reflow(true);
-				}
-			});
-		optionsSection.setExpanded(true);
-
-		m_optionsGroup = new Group(optionsSection, GROUP_STYLE);
-		m_optionsGroup.setLayout(new RowLayout(SWT.VERTICAL));
-		m_toolkit.adapt(m_optionsGroup);
-		optionsSection.setClient(m_optionsGroup);
+					@Override
+					public void expansionStateChanged(ExpansionEvent e)
+					{
+						m_form.reflow(true);
+					}
+				});
+			optionsSection.setExpanded(true);
+	
+			m_optionsGroup = new Group(optionsSection, GROUP_STYLE);
+			m_optionsGroup.setLayout(new RowLayout(SWT.VERTICAL));
+			m_toolkit.adapt(m_optionsGroup);
+			optionsSection.setClient(m_optionsGroup);
+		}
 
 		m_selectionListener = new ButtonSelectionListener();
 
-		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
+		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(ProjectSelectionListener.INSTANCE);
 
 		m_optionButtonsList = new LinkedList<Button>();
 		m_optionGroupsList = new LinkedList<Composite>();
 
+		Plugin.getInstance().registerView(this);
+		
 		update();
 	}
 
@@ -163,7 +138,9 @@ public class MainView extends ViewPart implements ISelectionListener
 	@Override
 	public void dispose()
 	{
-		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(this);
+		Plugin.getInstance().removeView(this);
+		
+		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(ProjectSelectionListener.INSTANCE);
 		m_toolkit.dispose();
 		super.dispose();
 	}
@@ -184,138 +161,26 @@ public class MainView extends ViewPart implements ISelectionListener
 	}
 
 	/**
-	 * @param project
-	 * @return
-	 */
-	private boolean checkProjectOpen(IProject project)
-	{
-		return (project != null && project.isAccessible());
-	}
-
-	/**
-	 * @param selection
-	 * @return
-	 */
-	private IProject findFirstOpenProjectBySelectedResource(IStructuredSelection selection)
-	{
-		for (Iterator<?> e = selection.iterator(); e.hasNext();)
-		{
-			final Object obj = e.next();
-			IResource resource = null;
-			if (obj instanceof IResource)
-			{
-				resource = (IResource) obj;
-			}
-			else if (obj instanceof IAdaptable)
-			{
-				resource = (IResource) ((IAdaptable) obj).getAdapter(IResource.class);
-			}
-			if (resource == null)
-			{
-				continue;
-			}
-			
-			//found resource
-			IProject project = resource.getProject();
-			if (checkProjectOpen(project))
-			{
-				return project;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * @param project
-	 */
-	private void setProject(IProject project)
-	{
-		if (m_project == null && project == null)
-		{
-			return;
-		}
-
-		if (m_project != null && m_project.equals(project))
-		{
-			return;
-		}
-
-		m_project = project;
-
-		update();
-	}
-
-	@Override
-	public void selectionChanged(IWorkbenchPart part, ISelection selection)
-	{
-		if (selection == null 
-				|| !(selection instanceof IStructuredSelection)
-				|| selection.isEmpty()
-			)
-		{
-			return;
-		}
-
-		IProject project = findFirstOpenProjectBySelectedResource((IStructuredSelection) selection);
-
-		if (project == null)
-		{
-			// TODO: try some other ways to get the project, for example from
-			// the IWorkbenchPart
-			return;
-		}
-
-		try
-		{
-			if (project.hasNature("org.eclipse.cdt.core.cnature"))
-			{
-				setProject(project);
-			}
-			else
-			{
-				setProject(null);
-			}
-		}
-		catch (CoreException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * @return file handle of a resource file. Cannot be null.
-	 */
-	private IFile getTragetsFile()
-	{
-		if (!checkProjectOpen(m_project))
-		{
-			// bad project.. probably already closed or something
-			setProject(null);
-			return null;
-		}
-
-		return m_project.getFile(Plugin.MT_TARGETS_FILE_NAME);
-	}
-
-	/**
 	 * 
 	 */
-	private void update()
+	void update()
 	{
 		m_addTargetsFileAction.setEnabled(false);
 		m_addNewTargetAction.setEnabled(false);
 		m_buildTargetAction.setEnabled(false);
 		m_form.setVisible(false);
+		
+		final Plugin plugin = Plugin.getInstance(); 
 
-		if (!checkProjectOpen(m_project))
+		if (!plugin.isCurrentProjectOpened())
 		{
 			this.setContentDescription("No project is selected");
 			return;
 		}
 
-		this.setContentDescription(m_project.getName());
+		this.setContentDescription(plugin.getCurrentProject().getName());
 
-		final boolean fileExists = getTragetsFile().exists();
+		final boolean fileExists = plugin.getTragetsFile().exists();
 		
 		m_addTargetsFileAction.setEnabled(!fileExists);
 		
@@ -350,7 +215,7 @@ public class MainView extends ViewPart implements ISelectionListener
 	 */
 	private void processParse()
 	{
-		parseFile(getTragetsFile());
+		parseFile(Plugin.getInstance().getTragetsFile());
 		
 		updateTargetString();
 		
@@ -364,7 +229,7 @@ public class MainView extends ViewPart implements ISelectionListener
 	 */
 	private void parseFile(IFile file)
 	{
-		if (!file.isAccessible())
+		if (file == null || !file.isAccessible())
 		{
 			return;
 		}
@@ -505,7 +370,7 @@ public class MainView extends ViewPart implements ISelectionListener
 		button.setData(targetCommand);
 		button.setToolTipText(hint);
 		button.addSelectionListener(m_selectionListener);
-		if (getSelectedRadioButton(m_targetsGroup) == null)
+		if (Util.getSelectedRadioButton(m_targetsGroup) == null)
 		{
 			button.setSelection(true);
 		}
@@ -537,7 +402,7 @@ public class MainView extends ViewPart implements ISelectionListener
 		button.setData(optionCommand);
 		button.setToolTipText(hint);
 		button.addSelectionListener(m_selectionListener);
-		if (getSelectedRadioButton(groupControl) == null)
+		if (Util.getSelectedRadioButton(groupControl) == null)
 		{
 			button.setSelection(true);
 		}
@@ -596,17 +461,18 @@ public class MainView extends ViewPart implements ISelectionListener
 		{
 			for (Composite group : m_optionGroupsList)
 			{
-				addButtonData(buffer, getSelectedRadioButton(group));	
+				addButtonData(buffer, Util.getSelectedRadioButton(group));	
 			}
 		}
 
 		// target
 		{
-			addButtonData(buffer, getSelectedRadioButton(m_targetsGroup));
+			addButtonData(buffer, Util.getSelectedRadioButton(m_targetsGroup));
 		}
 
-		m_targetString = buffer.toString().trim();
-		m_form.setText(m_targetString);
+		String targetString = buffer.toString().trim();
+		m_form.setText(targetString);
+		Plugin.getInstance().setTargetString(targetString);
 	}
 
 	/**
@@ -629,288 +495,6 @@ public class MainView extends ViewPart implements ISelectionListener
 		}
 		
 		buffer.append(button.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
-	}
-
-	/**
-	 * @param group
-	 * @return
-	 */
-	private Button getSelectedRadioButton(Composite group)
-	{
-		for (Control control : group.getChildren())
-		{
-			if (control instanceof Button)
-			{
-				if (((Button) control).getSelection())
-				{
-					return (Button) control;
-				}
-			}
-		}
-		return null;
-	}
-
-	//////////////////////////////////////////////////////////
-	class AddTargetsFileAction extends Action
-	{
-		public AddTargetsFileAction()
-		{
-			super("Add targets file to project");
-			setImageDescriptor(Plugin.getImage("/icons/enabl/file_add.gif"));
-			setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/file_add.gif"));
-		}
-
-		@Override
-		public void run()
-		{
-			try
-			{
-				ResourcesPlugin.getWorkspace().run(
-						new IWorkspaceRunnable()
-						{
-							@Override
-							public void run(IProgressMonitor monitor) throws CoreException
-							{
-								processAddFile(monitor);
-							}
-						},
-						m_project, IWorkspace.AVOID_UPDATE, null);
-			}
-			catch (CoreException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		private void processAddFile(IProgressMonitor monitor)
-		{
-			final IFile file = getTragetsFile();
-			if (file.exists())
-			{ 
-				// already exist
-				return; 
-			}
-
-			try
-			{
-				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-
-				Element rootElement = doc.createElement(Plugin.MT_XML_ROOT_ELEMENT_NAME);
-				doc.appendChild(rootElement);
-
-				// targets section
-				{
-					final Element targetsSection = doc.createElement(Plugin.MT_XML_TARGETS_SECTION_ELEMENT_NAME);
-					rootElement.appendChild(targetsSection);
-
-					Element target = doc.createElement(Plugin.MT_XML_TARGET_ELEMENT_NAME);
-					target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, "Build");
-					target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "build");
-					target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, "Default build target");
-					targetsSection.appendChild(target);
-
-					target = doc.createElement(Plugin.MT_XML_TARGET_ELEMENT_NAME);
-					target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, "Clean");
-					target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "clean");
-					target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, "Clean breviously built project");
-					targetsSection.appendChild(target);
-				}
-
-				// options section
-				{
-					final Element optionsSection = doc.createElement(Plugin.MT_XML_OPTIONS_SECTION_ELEMENT_NAME);
-					rootElement.appendChild(optionsSection);
-
-					Element option = doc.createElement(Plugin.MT_XML_OPTION_ELEMENT_NAME);
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, "Single Option");
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "option");
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, "Option to configure target behaviour");
-					optionsSection.appendChild(option);
-
-					Element optionsGroup = doc.createElement(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_NAME);
-					optionsGroup.setAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR, "Options Group");
-					optionsGroup.setAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR, "Mutually-exclusive options might be grouped");
-					optionsSection.appendChild(optionsGroup);
-
-					option = doc.createElement(Plugin.MT_XML_OPTION_ELEMENT_NAME);
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, "Debug");
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "Debug=true");
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, "Grouped option 1");
-					optionsGroup.appendChild(option);
-
-					option = doc.createElement(Plugin.MT_XML_OPTION_ELEMENT_NAME);
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, "Release");
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "Release=true");
-					option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, "Grouped option 2");
-					optionsGroup.appendChild(option);
-				}
-
-				writeDocumentToFile(doc, file, monitor);
-			}
-			catch (ParserConfigurationException e)
-			{
-				e.printStackTrace();
-			}
-			catch (DOMException e)
-			{
-				e.printStackTrace();
-			}
-			
-			update();
-		}
-
-		/**
-		 * @param doc
-		 * @param file
-		 * @param monitor
-		 */
-		private void writeDocumentToFile(Document doc, IFile file, IProgressMonitor monitor)
-		{
-			final ByteArrayOutputStream oStream = new ByteArrayOutputStream();
-
-			try
-			{
-				final Transformer serializer = TransformerFactory.newInstance().newTransformer();
-
-				serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-				serializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-
-				serializer.transform(new DOMSource(doc), new StreamResult(oStream));
-
-			}
-			catch (TransformerException e)
-			{
-				e.printStackTrace();
-			}
-
-			try
-			{
-				file.create(new ByteArrayInputStream(oStream.toByteArray()), false, monitor);
-			}
-			catch (CoreException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	}
-
-	//////////////////////////////////////////////////////////
-	class AddNewTargetAction extends Action
-	{
-		private final IMakeTargetManager m_targetManager;
-
-		public AddNewTargetAction()
-		{
-			super("Create new target");
-			setImageDescriptor(Plugin.getImage("/icons/enabl/target_add.gif"));
-			setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/target_add.gif"));
-			m_targetManager = MakeCorePlugin.getDefault().getTargetManager();
-		}
-
-		@Override
-		public void run()
-		{
-			try
-			{
-				IMakeTarget target = m_targetManager.createTarget(m_project, getTargetName("New target"), getTargetBuildId());
-				target.setStopOnError(true);
-				target.setRunAllBuilders(true);
-				target.setUseDefaultBuildCmd(true);
-				target.setBuildAttribute(IMakeTarget.BUILD_TARGET, m_targetString);
-				m_targetManager.addTarget(m_project, target);
-			}
-			catch (CoreException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		private String getTargetName(String targetName)
-		{
-			String newName = targetName;
-			int i = 0;
-			try
-			{
-				while (m_targetManager.findTarget(m_project, newName) != null)
-				{
-					i++;
-					newName = targetName + " (" + Integer.toString(i) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			catch (CoreException e)
-			{
-			}
-			return newName;
-		}
-
-		private String getTargetBuildId()
-		{
-			String[] id = m_targetManager.getTargetBuilders(m_project);
-			if (id.length == 0)
-			{
-				/*
-				 * throw new CoreException(new Status(IStatus.ERROR,
-				 * MakeUIPlugin.getUniqueIdentifier(), -1,
-				 * MakeUIPlugin.getResourceString
-				 * ("MakeTargetDialog.exception.noTargetBuilderOnProject"),
-				 * null)); //$NON-NLS-1$
-				 */
-				return null;
-			}
-			return id[0];
-		}
-	}
-
-	// ////////////////////////////////////////////////////////
-	class BuildTargetAction extends Action
-	{
-
-		private final IMakeTargetManager m_targetManager;
-		private final Shell m_shell;
-
-		public BuildTargetAction(Shell shell)
-		{
-			super("Build target");
-			setImageDescriptor(Plugin.getImage("/icons/enabl/target_build.png"));
-			setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/target_build.png"));
-			m_shell = shell;
-			m_targetManager = MakeCorePlugin.getDefault().getTargetManager();
-		}
-
-		@Override
-		public void run()
-		{
-			try
-			{
-				IMakeTarget target = m_targetManager.createTarget(m_project, "Custom target", getTargetBuildId());
-				target.setStopOnError(true);
-				target.setRunAllBuilders(true);
-				target.setUseDefaultBuildCmd(true);
-				target.setBuildAttribute(IMakeTarget.BUILD_TARGET, m_targetString);
-				TargetBuild.buildTargets(m_shell, new IMakeTarget[] { target });
-			}
-			catch (CoreException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		private String getTargetBuildId()
-		{
-			String[] id = m_targetManager.getTargetBuilders(m_project);
-			if (id.length == 0)
-			{
-				/*
-				 * throw new CoreException(new Status(IStatus.ERROR,
-				 * MakeUIPlugin.getUniqueIdentifier(), -1,
-				 * MakeUIPlugin.getResourceString
-				 * ("MakeTargetDialog.exception.noTargetBuilderOnProject"),
-				 * null)); //$NON-NLS-1$
-				 */
-				return null;
-			}
-			return id[0];
-		}
 	}
 
 	//////////////////////////////////////////////////////////
