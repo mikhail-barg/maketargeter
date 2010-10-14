@@ -65,10 +65,6 @@ class Util
 		return null;
 	}
 	
-	/**
-	 * @param group
-	 * @return
-	 */
 	static Button getSelectedRadioButton(Composite group)
 	{
 		for (Control control : group.getChildren())
@@ -84,6 +80,34 @@ class Util
 		return null;
 	}
 
+	static void setSelectedRadioButton(Composite group, String selectedButtonCaption)
+	{
+		Button firstButton = null;
+		for (Control control : group.getChildren())
+		{
+			if (control instanceof Button)
+			{
+				final Button button = (Button) control;
+				if (firstButton == null)
+				{
+					firstButton = button;
+				}
+				
+				if (selectedButtonCaption != null && button.getText().equals(selectedButtonCaption))
+				{
+					button.setSelection(true);
+					return;
+				}
+			}
+		}
+		
+		//haven't found the button with given caption
+		if (firstButton != null)
+		{
+			firstButton.setSelection(true);
+		}
+	}
+	
 	
 	static String getTargetBuildId(IMakeTargetManager targetManager, IProject project)
 	{
