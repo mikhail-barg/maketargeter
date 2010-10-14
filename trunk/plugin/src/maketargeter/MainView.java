@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ColumnLayout;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -62,11 +63,14 @@ public class MainView extends ViewPart
 	private Action m_addNewTargetAction;
 	private Action m_buildTargetAction;
 
-	private SelectionListener m_selectionListener;
+	private final SelectionListener m_selectionListener = new ButtonSelectionListener();
+	private final IExpansionListener m_expansionListener = new ExpansionListener();
 
-	private List<Button> m_optionButtonsList;
-	private List<Composite> m_optionGroupsList;
-
+	private final List<Button> m_optionButtonsList = new LinkedList<Button>();
+	private final List<Group> m_optionGroupsList = new LinkedList<Group>(); 
+	
+	private boolean m_disableSelectionUpdates = false;
+	
 	@Override
 	public void createPartControl(Composite parent)
 	{
@@ -81,14 +85,7 @@ public class MainView extends ViewPart
 		{
 			final Section targetsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
 			targetsSection.setText("Targets");
-			targetsSection.addExpansionListener(new ExpansionAdapter()
-				{
-					@Override
-					public void expansionStateChanged(ExpansionEvent e)
-					{
-						m_form.reflow(true);
-					}
-				});
+			targetsSection.addExpansionListener(m_expansionListener);
 			targetsSection.setExpanded(true);
 	
 			m_targetsGroup = new Group(targetsSection, GROUP_STYLE);
@@ -101,14 +98,7 @@ public class MainView extends ViewPart
 		{
 			final Section optionsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
 			optionsSection.setText("Options");
-			optionsSection.addExpansionListener(new ExpansionAdapter()
-				{
-					@Override
-					public void expansionStateChanged(ExpansionEvent e)
-					{
-						m_form.reflow(true);
-					}
-				});
+			optionsSection.addExpansionListener(m_expansionListener);
 			optionsSection.setExpanded(true);
 	
 			m_optionsGroup = new Group(optionsSection, GROUP_STYLE);
@@ -117,12 +107,7 @@ public class MainView extends ViewPart
 			optionsSection.setClient(m_optionsGroup);
 		}
 
-		m_selectionListener = new ButtonSelectionListener();
-
 		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(ProjectSelectionListener.INSTANCE);
-
-		m_optionButtonsList = new LinkedList<Button>();
-		m_optionGroupsList = new LinkedList<Composite>();
 
 		Plugin.getInstance().registerView(this);
 		
@@ -142,6 +127,7 @@ public class MainView extends ViewPart
 		
 		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(ProjectSelectionListener.INSTANCE);
 		m_toolkit.dispose();
+		
 		super.dispose();
 	}
 
@@ -215,9 +201,17 @@ public class MainView extends ViewPart
 	 */
 	private void processParse()
 	{
-		parseFile(Plugin.getInstance().getTragetsFile());
+		try
+		{
+			m_disableSelectionUpdates = true;
+			parseFile(Plugin.getInstance().getTragetsFile());
+		}
+		finally
+		{
+			m_disableSelectionUpdates = false;
+		}
 		
-		updateTargetString();
+		onSelectionChanged();
 		
 		m_form.setVisible(true);
 		m_addNewTargetAction.setEnabled(true);
@@ -247,15 +241,17 @@ public class MainView extends ViewPart
 			if (!rootElement.getNodeName().equals(Plugin.MT_XML_ROOT_ELEMENT_NAME))
 			{
 				inputStream.close();
-				return;
+				throw new IllegalArgumentException("Bad root element for targets file :'" + rootElement.getNodeName() + "', should be '" + Plugin.MT_XML_ROOT_ELEMENT_NAME + "'");
 			}
 
+			ISelectedStateData selectedState = Plugin.getInstance().getSelectedStateForCurrentProject();
+			
 			// targets sections
 			{
 				NodeList targetSections = rootElement.getElementsByTagName(Plugin.MT_XML_TARGETS_SECTION_ELEMENT_NAME);
 				for (int i = 0; i < targetSections.getLength(); ++i)
 				{
-					processTargetsSection((Element) targetSections.item(i));
+					processTargetsSection((Element) targetSections.item(i), selectedState);
 				}
 			}
 
@@ -264,7 +260,7 @@ public class MainView extends ViewPart
 				NodeList optionsSections = rootElement.getElementsByTagName(Plugin.MT_XML_OPTIONS_SECTION_ELEMENT_NAME);
 				for (int i = 0; i < optionsSections.getLength(); ++i)
 				{
-					processOptionsSection((Element) optionsSections.item(i));
+					processOptionsSection((Element) optionsSections.item(i), selectedState);
 				}
 			}
 
@@ -272,27 +268,24 @@ public class MainView extends ViewPart
 		}
 		catch (CoreException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		catch (SAXException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		catch (ParserConfigurationException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		m_form.reflow(true);
 	}
 
-	/**
-	 * 
-	 */
 	private void cleanupView()
 	{
 		for (Widget widget : m_targetsGroup.getChildren())
@@ -310,10 +303,7 @@ public class MainView extends ViewPart
 		m_optionGroupsList.clear();
 	}
 	
-	/**
-	 * @param section
-	 */
-	private void processTargetsSection(Element section)
+	private void processTargetsSection(Element section, ISelectedStateData selectedState)
 	{
 		if (section == null)
 		{
@@ -324,186 +314,162 @@ public class MainView extends ViewPart
 		for (int i = 0; i < targets.getLength(); ++i)
 		{
 			final Element target = (Element) targets.item(i);
-			addTarget(target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR),
+			addButton(m_targetsGroup, true, 
+						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR),
 						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR),
 						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR)
-					);
+						);
 		}
+		Util.setSelectedRadioButton(m_targetsGroup, selectedState.getSelectedTarget());
 	}
 
-	/**
-	 * @param section
-	 */
-	private void processOptionsSection(Element section)
+	private void processOptionsSection(Element section, ISelectedStateData selectedState)
 	{
 		if (section == null)
 		{
 			return;
 		}
+		
 		final NodeList sectionChildren = section.getChildNodes();
+		
 		for (int i = 0; i < sectionChildren.getLength(); ++i)
 		{
-			Node node = sectionChildren.item(i);
+			final Node node = sectionChildren.item(i);
 			if (node.getNodeName().equals(Plugin.MT_XML_OPTION_ELEMENT_NAME))
 			{
 				final Element element = (Element) node;
-				addOption(element.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR),
+				final Button button = addButton(m_optionsGroup, false,
+							element.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR),
 							element.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR),
 							element.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR)
-				);
+							);
+				if (selectedState.isOptionSelected(button.getText()))
+				{
+					button.setSelection(true);
+				}
+				m_optionButtonsList.add(button);
 			}
 			else if (node.getNodeName().equals(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_NAME))
 			{
-				addOptionsGroup((Element) node);
+				addOptionsGroup((Element) node, selectedState);
 			}
 		}
 	}
 
-	/**
-	 * @param targetName
-	 * @param targetCommand
-	 * @param hint
-	 */
-	private void addTarget(String targetName, String targetCommand, String hint)
+	private void addOptionsGroup(Element groupElement, ISelectedStateData selectedState)
 	{
-		final Button button = m_toolkit.createButton(m_targetsGroup, targetName, SWT.RADIO);
-		button.setData(targetCommand);
-		button.setToolTipText(hint);
-		button.addSelectionListener(m_selectionListener);
-		if (Util.getSelectedRadioButton(m_targetsGroup) == null)
-		{
-			button.setSelection(true);
-		}
-	}
-
-	/**
-	 * @param optionName
-	 * @param optionCommand
-	 * @param hint
-	 */
-	private void addOption(String optionName, String optionCommand, String hint)
-	{
-		final Button button = m_toolkit.createButton(m_optionsGroup, optionName, SWT.CHECK);
-		button.setData(optionCommand);
-		button.setToolTipText(hint);
-		button.addSelectionListener(m_selectionListener);
-		m_optionButtonsList.add(button);
-	}
-
-	/**
-	 * @param groupControl
-	 * @param optionName
-	 * @param optionCommand
-	 * @param hint
-	 */
-	private void addGroupedOption(Composite groupControl, String optionName, String optionCommand, String hint)
-	{
-		final Button button = m_toolkit.createButton(groupControl, optionName, SWT.RADIO);
-		button.setData(optionCommand);
-		button.setToolTipText(hint);
-		button.addSelectionListener(m_selectionListener);
-		if (Util.getSelectedRadioButton(groupControl) == null)
-		{
-			button.setSelection(true);
-		}
-	}
-
-	/**
-	 * @param groupElement
-	 */
-	private void addOptionsGroup(Element groupElement)
-	{
-		final Composite group = addOptionsGroup(groupElement.getAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR));
-		group.setToolTipText(groupElement.getAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR));
+		final Group group = addOptionsGroup(
+									groupElement.getAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR),
+									groupElement.getAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR)
+									);
 
 		final NodeList options = groupElement.getElementsByTagName(Plugin.MT_XML_OPTION_ELEMENT_NAME);
 		for (int i = 0; i < options.getLength(); ++i)
 		{
 			final Element option = (Element) options.item(i);
-			addGroupedOption(group,
-								option.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR),
-								option.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR),
-								option.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR)
-							);
+			addButton(group, true,
+						option.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR),
+						option.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR),
+						option.getAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR)
+						);
 		}
+		Util.setSelectedRadioButton(group, selectedState.getSelectedOptionGroupElement(group.getText()));
 		m_optionGroupsList.add(group);
 	}
-
-	/**
-	 * @param groupName
-	 * @return
-	 */
-	private Composite addOptionsGroup(String groupName)
+	
+	private Button addButton(Composite groupControl, boolean isRadio, String caption, String command, String hint)
+	{
+		final Button button = m_toolkit.createButton(groupControl, caption, isRadio? SWT.RADIO : SWT.CHECK);
+		button.setData(command);
+		button.setToolTipText(hint);
+		button.addSelectionListener(m_selectionListener);
+		return button;
+	}
+	
+	private Group addOptionsGroup(String groupName, String hint)
 	{
 		final Group group = new Group(m_optionsGroup, GROUP_STYLE);
 		group.setLayout(new RowLayout(SWT.VERTICAL));
 		m_toolkit.adapt(group);
 		group.setText(groupName);
+		group.setToolTipText(hint);
+		
 		return group;
 	}
 
-	/**
-	 * 
-	 */
-	private void updateTargetString()
+	private void onSelectionChanged()
 	{
-		final StringBuilder buffer = new StringBuilder();
+		if (m_disableSelectionUpdates)
+		{
+			return;
+		}
+		
+		final SelectedState selectedState = new SelectedState();
+		final StringBuilder targetStringBuilder = new StringBuilder();
 
 		// options
 		{
 			for (Button button : m_optionButtonsList)
 			{
-				addButtonData(buffer, button);
+				if (isButtonSelected(button))
+				{
+					targetStringBuilder.append(button.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
+					selectedState.addSelectedOption(button.getText());
+				}
 			}
 		}
 
 		// option groups
 		{
-			for (Composite group : m_optionGroupsList)
+			for (Group group : m_optionGroupsList)
 			{
-				addButtonData(buffer, Util.getSelectedRadioButton(group));	
+				final Button selectedButton = Util.getSelectedRadioButton(group);
+				if (isButtonSelected(selectedButton))
+				{
+					targetStringBuilder.append(selectedButton.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
+					selectedState.setSelectedOptionGroupElement(group.getText(), selectedButton.getText());
+				}
 			}
 		}
 
 		// target
 		{
-			addButtonData(buffer, Util.getSelectedRadioButton(m_targetsGroup));
+			final Button selectedButton = Util.getSelectedRadioButton(m_targetsGroup);
+			if (isButtonSelected(selectedButton))
+			{
+				targetStringBuilder.append(selectedButton.getData().toString());
+				selectedState.setSelectedTarget(selectedButton.getText());
+			}
 		}
 
-		String targetString = buffer.toString().trim();
+		String targetString = targetStringBuilder.toString().trim();
+		
 		m_form.setText(targetString);
 		Plugin.getInstance().setTargetString(targetString);
+		Plugin.getInstance().setSelectedStateForCurrentProject(selectedState);
 	}
 
-	/**
-	 * @param buffer
-	 * @param button
-	 */
-	private void addButtonData(StringBuilder buffer, Button button)
+	private boolean isButtonSelected(Button button)
 	{
-		if (button == null)
-		{
-			return;
-		}
-		if (!button.getSelection())
-		{
-			return;
-		}
-		if (button.getData() == null)
-		{
-			return;
-		}
-		
-		buffer.append(button.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
+		return (button != null && button.getSelection() && button.getData() != null);
 	}
-
+	
 	//////////////////////////////////////////////////////////
 	class ButtonSelectionListener extends SelectionAdapter
 	{
 		@Override
 		public void widgetSelected(SelectionEvent e)
 		{
-			updateTargetString();
+			onSelectionChanged();
+		}
+	}
+	
+	class ExpansionListener extends ExpansionAdapter
+	{
+		@Override
+		public void expansionStateChanged(ExpansionEvent e)
+		{
+			m_form.reflow(true);
 		}
 	}
 }

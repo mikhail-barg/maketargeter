@@ -1,8 +1,10 @@
 package maketargeter;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -71,6 +73,8 @@ public class Plugin extends AbstractUIPlugin
 	private final List<MainView> m_views = new LinkedList<MainView>();
 	private IProject m_currentProject;
 	private String m_targetString = "";
+	private final Map<IProject, SelectedState> m_selectionStorage = new HashMap<IProject, SelectedState>();
+	private final ISelectedStateData EMPTY_SELECTION = new SelectedState();
 	
 
 	/**
@@ -83,7 +87,7 @@ public class Plugin extends AbstractUIPlugin
 	
 	/**
 	 * Sets a new current project
-	 * @param project
+	 * @param project can be null
 	 * @return true if given project and previously seletced are both not null and different 
 	 */
 	boolean setCurrentProject(IProject project)
@@ -141,13 +145,56 @@ public class Plugin extends AbstractUIPlugin
 		}
 	}
 	
+	/** result is not null*/
 	String getTargetString()
 	{
 		return m_targetString;
 	}
 	
+	/** param cannot be null*/
 	void setTargetString(String string)
 	{
+		if (string == null)
+		{
+			throw new NullPointerException("Trying to set target string to be null");
+		}
 		m_targetString = string;
+	}
+	
+	
+	/**
+	 * Returns a selected state for the given project 
+	 * @param project can be null
+	 * @return selected state for the project. 
+	 * If the project is null or no selected state is known for the project, would return empty selection. Do not modify it! 
+	 */
+	ISelectedStateData getSelectedState(IProject project)
+	{
+		ISelectedStateData result = m_selectionStorage.get(project);
+		if (result == null)
+		{
+			result = EMPTY_SELECTION;
+		}
+		return result;
+	}
+	
+	/** result can be null */
+	ISelectedStateData getSelectedStateForCurrentProject()
+	{
+		return getSelectedState(m_currentProject);
+	}
+	
+	void setSelectedState(IProject project, SelectedState state)
+	{
+		if (project == null)
+		{
+			return;
+		}
+		m_selectionStorage.put(project, state);
+	}
+	
+	void setSelectedStateForCurrentProject(SelectedState state)
+	{
+		setSelectedState(m_currentProject, state);
 	}
 }

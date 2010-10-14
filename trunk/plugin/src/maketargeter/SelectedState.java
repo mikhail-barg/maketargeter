@@ -16,7 +16,7 @@ import java.util.Set;
  * 
  *
  */
-class SelectedState
+class SelectedState implements ISelectedStateData
 {
 	/** stores caption of the selected target */
 	private String m_selectedTarget = null;
@@ -27,4 +27,39 @@ class SelectedState
 	/** maps Option group caption -> selected element caption */
 	private final Map<String, String> m_optionGroupsElements = new HashMap<String, String>();
 	
+	
+	void setSelectedTarget(String targetCaption)
+	{
+		m_selectedTarget = targetCaption;
+	}
+	
+	/** can be null*/
+	@Override
+	public String getSelectedTarget()
+	{
+		return m_selectedTarget;
+	}
+	
+	void addSelectedOption(String optionCaption)
+	{
+		m_selectedOptions.add(optionCaption);
+	}
+	
+	@Override
+	public boolean isOptionSelected(String optionCaption)
+	{
+		return m_selectedOptions.contains(optionCaption);
+	}
+	
+	void setSelectedOptionGroupElement(String optionGroupCaption, String selectedElementCaption)
+	{
+		m_optionGroupsElements.put(optionGroupCaption, selectedElementCaption);
+	}
+	
+	/** can be null*/
+	@Override
+	public String getSelectedOptionGroupElement(String optionGroupCaption)
+	{
+		return m_optionGroupsElements.get(optionGroupCaption);
+	}
 }
