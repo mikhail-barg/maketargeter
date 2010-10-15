@@ -1,4 +1,7 @@
-package maketargeter;
+package maketargeter.actions;
+
+import maketargeter.Plugin;
+import maketargeter.Util;
 
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;

@@ -50,12 +50,12 @@ public class Plugin extends AbstractUIPlugin
 		m_plugin = this;
 	}
 
-	static Plugin getInstance()
+	public static Plugin getInstance()
 	{
 		return m_plugin;
 	}
 
-	static ImageDescriptor getImage(String path)
+	public static ImageDescriptor getImage(String path)
 	{
 		URL url = null;
 
@@ -82,7 +82,7 @@ public class Plugin extends AbstractUIPlugin
 	/**
 	 * @return currently selected project. Can be null;
 	 */
-	IProject getCurrentProject()
+	public IProject getCurrentProject()
 	{
 		return m_currentProject;
 	}
@@ -118,7 +118,7 @@ public class Plugin extends AbstractUIPlugin
 	/**
 	 * @return file handle of a resource file. Can be null.
 	 */
-	IFile getTragetsFile()
+	public IFile getTragetsFile()
 	{
 		if (!isCurrentProjectOpened())
 		{
@@ -139,7 +139,7 @@ public class Plugin extends AbstractUIPlugin
 		m_views.remove(view);
 	}
 	
-	void updateViews()
+	public void updateViews()
 	{
 		for (MainView view : m_views)
 		{
@@ -148,7 +148,7 @@ public class Plugin extends AbstractUIPlugin
 	}
 	
 	/** result is not null*/
-	String getTargetString()
+	public String getTargetString()
 	{
 		return m_targetString;
 	}
@@ -164,7 +164,7 @@ public class Plugin extends AbstractUIPlugin
 	}
 
 	/** result is not null*/
-	String getCaptionString()
+	public String getCaptionString()
 	{
 		return m_captionString;
 	}

@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Control;
  * Miscellaneous utility functions.
  *
  */
-class Util
+public class Util
 {
 
 	/**
@@ -109,7 +109,7 @@ class Util
 	}
 	
 	
-	static String getTargetBuildId(IMakeTargetManager targetManager, IProject project)
+	public static String getTargetBuildId(IMakeTargetManager targetManager, IProject project)
 	{
 		String[] id = targetManager.getTargetBuilders(project);
 		if (id.length == 0)
