@@ -406,6 +406,8 @@ public class MainView extends ViewPart
 		
 		final SelectedState selectedState = new SelectedState();
 		final StringBuilder targetStringBuilder = new StringBuilder();
+		final StringBuilder captionStringBuilder = new StringBuilder();
+		String captionString = ""; 
 
 		// options
 		{
@@ -414,6 +416,7 @@ public class MainView extends ViewPart
 				if (isButtonSelected(button))
 				{
 					targetStringBuilder.append(button.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
+					captionStringBuilder.append(button.getText()).append(Plugin.MT_CAPTION_LINE_SEPARATOR);
 					selectedState.addSelectedOption(button.getText());
 				}
 			}
@@ -427,6 +430,7 @@ public class MainView extends ViewPart
 				if (isButtonSelected(selectedButton))
 				{
 					targetStringBuilder.append(selectedButton.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
+					captionStringBuilder.append(selectedButton.getText()).append(Plugin.MT_CAPTION_LINE_SEPARATOR);
 					selectedState.setSelectedOptionGroupElement(group.getText(), selectedButton.getText());
 				}
 			}
@@ -438,14 +442,17 @@ public class MainView extends ViewPart
 			if (isButtonSelected(selectedButton))
 			{
 				targetStringBuilder.append(selectedButton.getData().toString());
+				captionString = selectedButton.getText() + Plugin.MT_CAPTION_LINE_SEPARATOR;
 				selectedState.setSelectedTarget(selectedButton.getText());
 			}
 		}
 
 		String targetString = targetStringBuilder.toString().trim();
+		captionString = captionString + captionStringBuilder.toString().trim();
 		
 		m_form.setText(targetString);
 		Plugin.getInstance().setTargetString(targetString);
+		Plugin.getInstance().setCaptionString(captionString);
 		Plugin.getInstance().setSelectedStateForCurrentProject(selectedState);
 	}
 

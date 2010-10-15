@@ -35,7 +35,7 @@ class AddNewTargetAction extends Action
 		{
 			final IMakeTarget target = targetManager.createTarget(
 											project, 
-											getTargetName(targetManager, project, "New target"), 
+											getTargetName(targetManager, project, Plugin.getInstance().getCaptionString()), 
 											Util.getTargetBuildId(targetManager, project));
 			target.setStopOnError(true);
 			target.setRunAllBuilders(true);
