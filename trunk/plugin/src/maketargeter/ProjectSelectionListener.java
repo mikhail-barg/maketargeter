@@ -1,5 +1,7 @@
 package maketargeter;
 
+import org.eclipse.cdt.core.CCProjectNature;
+import org.eclipse.cdt.core.CProjectNature;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
@@ -42,7 +44,7 @@ class ProjectSelectionListener implements ISelectionListener
 
 		try
 		{
-			if (project.hasNature("org.eclipse.cdt.core.cnature")) //$NON-NLS-1$ 
+			if (project.hasNature(CProjectNature.C_NATURE_ID) || project.hasNature(CCProjectNature.CC_NATURE_ID)) //$NON-NLS-1$ 
 			{
 				Plugin.getInstance().setCurrentProject(project);
 			}
