@@ -36,6 +36,7 @@ public class Plugin extends AbstractUIPlugin
 	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR = "hint";
 
 	public static final String MT_TARGET_LINE_SEPARATOR = " ";
+	public static final String MT_CAPTION_LINE_SEPARATOR = " ";
 
 	private static Plugin m_plugin;
 
@@ -73,6 +74,7 @@ public class Plugin extends AbstractUIPlugin
 	private final List<MainView> m_views = new LinkedList<MainView>();
 	private IProject m_currentProject;
 	private String m_targetString = "";
+	private String m_captionString = "";
 	private final Map<IProject, SelectedState> m_selectionStorage = new HashMap<IProject, SelectedState>();
 	private final ISelectedStateData EMPTY_SELECTION = new SelectedState();
 	
@@ -159,6 +161,22 @@ public class Plugin extends AbstractUIPlugin
 			throw new NullPointerException("Trying to set target string to be null");
 		}
 		m_targetString = string;
+	}
+
+	/** result is not null*/
+	String getCaptionString()
+	{
+		return m_captionString;
+	}
+	
+	/** param cannot be null*/
+	void setCaptionString(String string)
+	{
+		if (string == null)
+		{
+			throw new NullPointerException("Trying to set caption string to be null");
+		}
+		m_captionString = string;
 	}
 	
 	
