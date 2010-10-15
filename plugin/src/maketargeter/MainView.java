@@ -15,6 +15,7 @@ import maketargeter.actions.AddNewTargetAction;
 import maketargeter.actions.AddTargetsFileAction;
 import maketargeter.actions.BuildTargetAction;
 import maketargeter.actions.CopyTargetToClipboardAction;
+import maketargeter.actions.SetTargetToProjectSettings;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -68,6 +69,7 @@ public class MainView extends ViewPart
 	private Action m_addNewTargetAction;
 	private Action m_buildTargetAction;
 	private Action m_copyToClipboardAction;
+	private Action m_setToProjectAction;
 
 	private final SelectionListener m_selectionListener = new ButtonSelectionListener();
 	private final IExpansionListener m_expansionListener = new ExpansionListener();
@@ -146,9 +148,11 @@ public class MainView extends ViewPart
 		m_addNewTargetAction = new AddNewTargetAction();
 		m_buildTargetAction = new BuildTargetAction(shell);
 		m_copyToClipboardAction = new CopyTargetToClipboardAction();
+		m_setToProjectAction = new SetTargetToProjectSettings();
 
 		IToolBarManager tm = getViewSite().getActionBars().getToolBarManager();
 		tm.add(m_addTargetsFileAction);
+		tm.add(m_setToProjectAction);
 		tm.add(m_addNewTargetAction);
 		tm.add(m_buildTargetAction);
 		tm.add(m_copyToClipboardAction);
@@ -163,6 +167,7 @@ public class MainView extends ViewPart
 		m_addNewTargetAction.setEnabled(false);
 		m_buildTargetAction.setEnabled(false);
 		m_copyToClipboardAction.setEnabled(false);
+		m_setToProjectAction.setEnabled(false);
 		m_form.setVisible(false);
 		
 		final Plugin plugin = Plugin.getInstance(); 
@@ -226,6 +231,7 @@ public class MainView extends ViewPart
 		m_addNewTargetAction.setEnabled(true);
 		m_buildTargetAction.setEnabled(true);
 		m_copyToClipboardAction.setEnabled(true);
+		m_setToProjectAction.setEnabled(SetTargetToProjectSettings.canBeEnabled());
 	}
 	
 	/**
