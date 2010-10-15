@@ -11,6 +11,11 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import maketargeter.actions.AddNewTargetAction;
+import maketargeter.actions.AddTargetsFileAction;
+import maketargeter.actions.BuildTargetAction;
+import maketargeter.actions.CopyTargetToClipboardAction;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
@@ -62,6 +67,7 @@ public class MainView extends ViewPart
 	private Action m_addTargetsFileAction;
 	private Action m_addNewTargetAction;
 	private Action m_buildTargetAction;
+	private Action m_copyToClipboardAction;
 
 	private final SelectionListener m_selectionListener = new ButtonSelectionListener();
 	private final IExpansionListener m_expansionListener = new ExpansionListener();
@@ -80,7 +86,7 @@ public class MainView extends ViewPart
 
 		m_form = m_toolkit.createScrolledForm(parent);
 		m_form.getBody().setLayout(new ColumnLayout());
-
+		
 		//targets section
 		{
 			final Section targetsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
@@ -139,11 +145,13 @@ public class MainView extends ViewPart
 		m_addTargetsFileAction = new AddTargetsFileAction();
 		m_addNewTargetAction = new AddNewTargetAction();
 		m_buildTargetAction = new BuildTargetAction(shell);
+		m_copyToClipboardAction = new CopyTargetToClipboardAction();
 
 		IToolBarManager tm = getViewSite().getActionBars().getToolBarManager();
 		tm.add(m_addTargetsFileAction);
 		tm.add(m_addNewTargetAction);
 		tm.add(m_buildTargetAction);
+		tm.add(m_copyToClipboardAction);
 	}
 
 	/**
@@ -154,6 +162,7 @@ public class MainView extends ViewPart
 		m_addTargetsFileAction.setEnabled(false);
 		m_addNewTargetAction.setEnabled(false);
 		m_buildTargetAction.setEnabled(false);
+		m_copyToClipboardAction.setEnabled(false);
 		m_form.setVisible(false);
 		
 		final Plugin plugin = Plugin.getInstance(); 
@@ -216,6 +225,7 @@ public class MainView extends ViewPart
 		m_form.setVisible(true);
 		m_addNewTargetAction.setEnabled(true);
 		m_buildTargetAction.setEnabled(true);
+		m_copyToClipboardAction.setEnabled(true);
 	}
 	
 	/**

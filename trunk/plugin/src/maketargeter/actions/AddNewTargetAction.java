@@ -1,4 +1,7 @@
-package maketargeter;
+package maketargeter.actions;
+
+import maketargeter.Plugin;
+import maketargeter.Util;
 
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
@@ -11,7 +14,7 @@ import org.eclipse.jface.action.Action;
  * @author Mike
  *
  */
-class AddNewTargetAction extends Action
+public class AddNewTargetAction extends Action
 {
 	public AddNewTargetAction()
 	{

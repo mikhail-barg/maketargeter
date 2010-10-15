@@ -1,4 +1,4 @@
-package maketargeter;
+package maketargeter.actions;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,6 +11,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import maketargeter.Plugin;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
@@ -27,7 +29,7 @@ import org.w3c.dom.Element;
  * @author Mike
  *
  */
-class AddTargetsFileAction extends Action
+public class AddTargetsFileAction extends Action
 {
 	public AddTargetsFileAction()
 	{
