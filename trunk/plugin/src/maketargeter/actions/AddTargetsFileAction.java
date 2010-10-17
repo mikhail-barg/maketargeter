@@ -45,6 +45,8 @@ public class AddTargetsFileAction extends Action
 
 	public void update()
 	{
+		setEnabled(Plugin.getInstance().getCurrentProject() != null);
+		
 		if (Plugin.getInstance().targetFileExists())
 		{
 			setText("Edit targets description file");
