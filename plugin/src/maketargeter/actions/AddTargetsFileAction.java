@@ -80,6 +80,7 @@ public class AddTargetsFileAction extends Action
 		try
 		{
 			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+			doc.setXmlStandalone(true);
 
 			Element rootElement = doc.createElement(Plugin.MT_XML_ROOT_ELEMENT_NAME);
 			doc.appendChild(rootElement);

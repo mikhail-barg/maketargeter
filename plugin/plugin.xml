@@ -13,5 +13,15 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.eclipse.core.runtime.xml"
+            file-names="make.targets"
+            id="maketargeter.make-targets"
+            name="MakeTargets description file"
+            priority="normal">
+      </content-type>
+   </extension>
 
 </plugin>
