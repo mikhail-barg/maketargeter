@@ -65,7 +65,7 @@ public class MainView extends ViewPart
 	private Group m_targetsGroup;
 	private Group m_optionsGroup;
 
-	private Action m_addTargetsFileAction;
+	private AddTargetsFileAction m_addTargetsFileAction;
 	private Action m_addNewTargetAction;
 	private Action m_buildTargetAction;
 	private Action m_copyToClipboardAction;
@@ -163,7 +163,7 @@ public class MainView extends ViewPart
 	 */
 	void update()
 	{
-		m_addTargetsFileAction.setEnabled(false);
+		m_addTargetsFileAction.update();
 		m_addNewTargetAction.setEnabled(false);
 		m_buildTargetAction.setEnabled(false);
 		m_copyToClipboardAction.setEnabled(false);
@@ -180,11 +180,9 @@ public class MainView extends ViewPart
 
 		this.setContentDescription(plugin.getCurrentProject().getName());
 
-		final boolean fileExists = plugin.getTragetsFile().exists();
 		
-		m_addTargetsFileAction.setEnabled(!fileExists);
 		
-		if (!fileExists)
+		if (!plugin.targetFileExists())
 		{
 			return;
 		}
