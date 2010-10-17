@@ -21,6 +21,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,13 +34,31 @@ import org.w3c.dom.Element;
  */
 public class AddTargetsFileAction extends Action
 {
+	private final ImageDescriptor m_imageAddFileEnabled = Plugin.getImage("/icons/enabl/file_add.gif");	//$NON-NLS-1$
+	private final ImageDescriptor m_imageEditFileEnabled = Plugin.getImage("/icons/enabl/file_edit.gif");	//$NON-NLS-1$
+	private final ImageDescriptor m_imageAddFileDisabled = Plugin.getImage("/icons/disabl/file_add.gif"); //$NON-NLS-1$
+	
 	public AddTargetsFileAction()
 	{
-		super("Add targets file to project");
-		setImageDescriptor(Plugin.getImage("/icons/enabl/file_add.gif")); //$NON-NLS-1$
-		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/file_add.gif")); //$NON-NLS-1$
+		super();
 	}
 
+	public void update()
+	{
+		if (Plugin.getInstance().targetFileExists())
+		{
+			setText("Edit targets description file");
+			setImageDescriptor(m_imageEditFileEnabled); 
+			setDisabledImageDescriptor(m_imageAddFileDisabled);
+		}
+		else
+		{
+			setText("Add targets description file to project");
+			setImageDescriptor(m_imageAddFileEnabled); 
+			setDisabledImageDescriptor(m_imageAddFileDisabled);
+		}
+	}
+	
 	@Override
 	public void run()
 	{
@@ -49,7 +70,12 @@ public class AddTargetsFileAction extends Action
 						@Override
 						public void run(IProgressMonitor monitor) throws CoreException
 						{
-							processAddFile(monitor);
+							if (!Plugin.getInstance().targetFileExists())
+							{
+								processAddFile(monitor);
+							}
+							
+							openEditor();
 						}
 					},
 					Plugin.getInstance().getCurrentProject(),
@@ -59,6 +85,20 @@ public class AddTargetsFileAction extends Action
 		catch (CoreException e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	private void openEditor()
+	{
+		final IFile file = Plugin.getInstance().getTragetsFile();
+		
+		try
+		{
+			org.eclipse.ui.ide.IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), file);
+		}
+		catch (PartInitException e)
+		{
+			throw new RuntimeException("Failed to open editor for the file");
 		}
 	}
 

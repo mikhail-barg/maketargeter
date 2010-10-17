@@ -128,6 +128,12 @@ public class Plugin extends AbstractUIPlugin
 
 		return m_currentProject.getFile(Plugin.MT_TARGETS_FILE_NAME);
 	}
+	
+	public boolean targetFileExists()
+	{
+		final IFile file = Plugin.getInstance().getTragetsFile();
+		return file != null && file.exists();  
+	}
 
 	void registerView(MainView view)
 	{
