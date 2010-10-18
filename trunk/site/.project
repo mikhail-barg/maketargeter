@@ -3,6 +3,7 @@
 	<name>maketargeter-site</name>
 	<comment></comment>
 	<projects>
+		<project>maketargeter-feature</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
