@@ -92,7 +92,7 @@ public class MainView extends ViewPart
 		//targets section
 		{
 			final Section targetsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
-			targetsSection.setText("Targets");
+			targetsSection.setText(Messages.MainView_targets_section);
 			targetsSection.addExpansionListener(m_expansionListener);
 			targetsSection.setExpanded(true);
 	
@@ -105,7 +105,7 @@ public class MainView extends ViewPart
 		//Options section
 		{
 			final Section optionsSection = m_toolkit.createSection(m_form.getBody(), SECTION_STYLE);
-			optionsSection.setText("Options");
+			optionsSection.setText(Messages.MainView_options_section);
 			optionsSection.addExpansionListener(m_expansionListener);
 			optionsSection.setExpanded(true);
 	
@@ -174,7 +174,7 @@ public class MainView extends ViewPart
 
 		if (!plugin.isCurrentProjectOpened())
 		{
-			this.setContentDescription("No project is selected");
+			this.setContentDescription(Messages.MainView_no_project);
 			return;
 		}
 
@@ -255,7 +255,7 @@ public class MainView extends ViewPart
 			if (!rootElement.getNodeName().equals(Plugin.MT_XML_ROOT_ELEMENT_NAME))
 			{
 				inputStream.close();
-				throw new IllegalArgumentException("Bad root element for targets file :'" + rootElement.getNodeName() + "', should be '" + Plugin.MT_XML_ROOT_ELEMENT_NAME + "'");
+				throw new IllegalArgumentException(Messages.MainView_error1_1 + rootElement.getNodeName() + Messages.MainView_error1_2 + Plugin.MT_XML_ROOT_ELEMENT_NAME + Messages.MainView_error1_3);
 			}
 
 			ISelectedStateData selectedState = Plugin.getInstance().getSelectedStateForCurrentProject();
@@ -421,7 +421,7 @@ public class MainView extends ViewPart
 		final SelectedState selectedState = new SelectedState();
 		final StringBuilder targetStringBuilder = new StringBuilder();
 		final StringBuilder captionStringBuilder = new StringBuilder();
-		String captionString = ""; 
+		String captionString = "";  //$NON-NLS-1$
 
 		// options
 		{

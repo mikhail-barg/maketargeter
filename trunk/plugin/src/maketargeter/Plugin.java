@@ -15,28 +15,28 @@ public class Plugin extends AbstractUIPlugin
 {
 
 	/////////////////////////////////////////////////////////////
-	public static final String MT_TARGETS_FILE_NAME = "make.targets";
+	public static final String MT_TARGETS_FILE_NAME = "make.targets"; //$NON-NLS-1$
 
-	public static final String MT_XML_ROOT_ELEMENT_NAME = "makeTargetsDescription";
+	public static final String MT_XML_ROOT_ELEMENT_NAME = "makeTargetsDescription"; //$NON-NLS-1$
 
-	public static final String MT_XML_TARGETS_SECTION_ELEMENT_NAME = "targets";
-	public static final String MT_XML_TARGET_ELEMENT_NAME = "target";
-	public static final String MT_XML_TARGET_ELEMENT_TEXT_ATTR = "caption";
-	public static final String MT_XML_TARGET_ELEMENT_COMMAND_ATTR = "command";
-	public static final String MT_XML_TARGET_ELEMENT_HINT_ATTR = "hint";
+	public static final String MT_XML_TARGETS_SECTION_ELEMENT_NAME = "targets"; //$NON-NLS-1$
+	public static final String MT_XML_TARGET_ELEMENT_NAME = "target"; //$NON-NLS-1$
+	public static final String MT_XML_TARGET_ELEMENT_TEXT_ATTR = "caption"; //$NON-NLS-1$
+	public static final String MT_XML_TARGET_ELEMENT_COMMAND_ATTR = "command"; //$NON-NLS-1$
+	public static final String MT_XML_TARGET_ELEMENT_HINT_ATTR = "hint"; //$NON-NLS-1$
 
-	public static final String MT_XML_OPTIONS_SECTION_ELEMENT_NAME = "options";
-	public static final String MT_XML_OPTION_ELEMENT_NAME = "option";
-	public static final String MT_XML_OPTION_ELEMENT_TEXT_ATTR = "caption";
-	public static final String MT_XML_OPTION_ELEMENT_COMMAND_ATTR = "command";
-	public static final String MT_XML_OPTION_ELEMENT_HINT_ATTR = "hint";
+	public static final String MT_XML_OPTIONS_SECTION_ELEMENT_NAME = "options"; //$NON-NLS-1$
+	public static final String MT_XML_OPTION_ELEMENT_NAME = "option"; //$NON-NLS-1$
+	public static final String MT_XML_OPTION_ELEMENT_TEXT_ATTR = "caption"; //$NON-NLS-1$
+	public static final String MT_XML_OPTION_ELEMENT_COMMAND_ATTR = "command"; //$NON-NLS-1$
+	public static final String MT_XML_OPTION_ELEMENT_HINT_ATTR = "hint"; //$NON-NLS-1$
 
-	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_NAME = "options_group";
-	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR = "caption";
-	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR = "hint";
+	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_NAME = "options_group"; //$NON-NLS-1$
+	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR = "caption"; //$NON-NLS-1$
+	public static final String MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR = "hint"; //$NON-NLS-1$
 
-	public static final String MT_TARGET_LINE_SEPARATOR = " ";
-	public static final String MT_CAPTION_LINE_SEPARATOR = " ";
+	public static final String MT_TARGET_LINE_SEPARATOR = " "; //$NON-NLS-1$
+	public static final String MT_CAPTION_LINE_SEPARATOR = " "; //$NON-NLS-1$
 
 	private static Plugin m_plugin;
 
@@ -45,7 +45,7 @@ public class Plugin extends AbstractUIPlugin
 	{
 		if (m_plugin != null)
 		{
-			throw new IllegalStateException("Trying to initialize second instance of singleton plugin");
+			throw new IllegalStateException(Messages.Plugin_error1);
 		}
 		m_plugin = this;
 	}
@@ -73,8 +73,8 @@ public class Plugin extends AbstractUIPlugin
 	
 	private final List<MainView> m_views = new LinkedList<MainView>();
 	private IProject m_currentProject;
-	private String m_targetString = "";
-	private String m_captionString = "";
+	private String m_targetString = ""; //$NON-NLS-1$
+	private String m_captionString = ""; //$NON-NLS-1$
 	private final Map<IProject, SelectedState> m_selectionStorage = new HashMap<IProject, SelectedState>();
 	private final ISelectedStateData EMPTY_SELECTION = new SelectedState();
 	
@@ -164,7 +164,7 @@ public class Plugin extends AbstractUIPlugin
 	{
 		if (string == null)
 		{
-			throw new NullPointerException("Trying to set target string to be null");
+			throw new NullPointerException(Messages.Plugin_error2);
 		}
 		m_targetString = string;
 	}
@@ -180,7 +180,7 @@ public class Plugin extends AbstractUIPlugin
 	{
 		if (string == null)
 		{
-			throw new NullPointerException("Trying to set caption string to be null");
+			throw new NullPointerException(Messages.Plugin_error3);
 		}
 		m_captionString = string;
 	}

@@ -18,7 +18,7 @@ public class BuildTargetAction extends Action
 
 	public BuildTargetAction(Shell shell)
 	{
-		super("Build target");
+		super(Messages.BuildTargetAction_action1);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/target_build.png")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/target_build.png")); //$NON-NLS-1$
 		m_shell = shell;
@@ -37,7 +37,7 @@ public class BuildTargetAction extends Action
 		
 		try
 		{
-			IMakeTarget target = targetManager.createTarget(project, "Custom target", Util.getTargetBuildId(targetManager, project));
+			IMakeTarget target = targetManager.createTarget(project, "Custom target", Util.getTargetBuildId(targetManager, project)); //$NON-NLS-1$
 			target.setStopOnError(true);
 			target.setRunAllBuilders(true);
 			target.setUseDefaultBuildCmd(true);

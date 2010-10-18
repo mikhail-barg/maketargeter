@@ -18,7 +18,7 @@ public class AddNewTargetAction extends Action
 {
 	public AddNewTargetAction()
 	{
-		super("Create new target");
+		super(Messages.AddNewTargetAction_action1);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/target_add.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/target_add.gif")); //$NON-NLS-1$
 	}

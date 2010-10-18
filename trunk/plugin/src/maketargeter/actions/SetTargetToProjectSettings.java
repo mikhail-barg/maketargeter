@@ -15,7 +15,7 @@ public class SetTargetToProjectSettings extends Action
 {
 	public SetTargetToProjectSettings()
 	{
-		super("Set target to project settings");
+		super(Messages.SetTargetToProjectSettings_action1);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/action-editconfig.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/action-editconfig.gif")); //$NON-NLS-1$
 	}
@@ -32,7 +32,7 @@ public class SetTargetToProjectSettings extends Action
 		ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project);
 		if (projectDescription == null)
 		{
-			throw new RuntimeException("Failed to get a description for the project '" + Plugin.getInstance().getCurrentProject() + "'");
+			throw new RuntimeException(Messages.SetTargetToProjectSettings_error1_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error1_2);
 		}
 		
 		IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
@@ -65,7 +65,7 @@ public class SetTargetToProjectSettings extends Action
 		ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project, false);
 		if (projectDescription == null)
 		{
-			throw new RuntimeException("Failed to get a description for the project '" + Plugin.getInstance().getCurrentProject() + "'");
+			throw new RuntimeException(Messages.SetTargetToProjectSettings_error2_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error2_2);
 		}
 		IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
 		

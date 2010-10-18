@@ -12,7 +12,7 @@ public class CopyTargetToClipboardAction extends Action
 {
 	public CopyTargetToClipboardAction()
 	{
-		super("Copy target string to clipboard");
+		super(Messages.CopyTargetToClipboardAction_action1);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/copy_edit.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/copy_edit.gif")); //$NON-NLS-1$
 	}
