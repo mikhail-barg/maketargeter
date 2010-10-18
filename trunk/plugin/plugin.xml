@@ -9,7 +9,7 @@
             class="maketargeter.MainView"
             icon="icons/main.gif"
             id="MakeTargeter.view"
-            name="Make Targeter"
+            name="%view.name"
             restorable="true">
       </view>
    </extension>
@@ -19,7 +19,7 @@
             base-type="org.eclipse.core.runtime.xml"
             file-names="make.targets"
             id="maketargeter.make-targets"
-            name="MakeTargets description file"
+            name="%content-type.name"
             priority="normal">
       </content-type>
    </extension>
