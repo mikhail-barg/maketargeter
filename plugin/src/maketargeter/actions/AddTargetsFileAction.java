@@ -49,13 +49,13 @@ public class AddTargetsFileAction extends Action
 		
 		if (Plugin.getInstance().targetFileExists())
 		{
-			setText("Edit targets description file");
+			setText(Messages.AddTargetsFileAction_action1);
 			setImageDescriptor(m_imageEditFileEnabled); 
 			setDisabledImageDescriptor(m_imageAddFileDisabled);
 		}
 		else
 		{
-			setText("Add targets description file to project");
+			setText(Messages.AddTargetsFileAction_action2);
 			setImageDescriptor(m_imageAddFileEnabled); 
 			setDisabledImageDescriptor(m_imageAddFileDisabled);
 		}
@@ -100,7 +100,7 @@ public class AddTargetsFileAction extends Action
 		}
 		catch (PartInitException e)
 		{
-			throw new RuntimeException("Failed to open editor for the file");
+			throw new RuntimeException(Messages.AddTargetsFileAction_error1);
 		}
 	}
 
@@ -133,15 +133,15 @@ public class AddTargetsFileAction extends Action
 				rootElement.appendChild(targetsSection);
 
 				Element target = doc.createElement(Plugin.MT_XML_TARGET_ELEMENT_NAME);
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, "Build");
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "build");
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, "Default build target");
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_target1);
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "build"); //$NON-NLS-1$
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_target1_comment);
 				targetsSection.appendChild(target);
 
 				target = doc.createElement(Plugin.MT_XML_TARGET_ELEMENT_NAME);
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, "Clean");
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "clean");
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, "Clean previously built project");
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_target2);
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "clean"); //$NON-NLS-1$
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_target2_comment);
 				targetsSection.appendChild(target);
 			}
 
@@ -151,26 +151,26 @@ public class AddTargetsFileAction extends Action
 				rootElement.appendChild(optionsSection);
 
 				Element option = doc.createElement(Plugin.MT_XML_OPTION_ELEMENT_NAME);
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, "Single Option");
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "option");
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, "Option to configure target behaviour");
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_option1);
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "option"); //$NON-NLS-1$
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_option1_comment);
 				optionsSection.appendChild(option);
 
 				Element optionsGroup = doc.createElement(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_NAME);
-				optionsGroup.setAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR, "Options Group");
-				optionsGroup.setAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR, "Mutually-exclusive options might be grouped");
+				optionsGroup.setAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_opt_group1);
+				optionsGroup.setAttribute(Plugin.MT_XML_OPTIONS_GROUP_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_opt_group1_comment);
 				optionsSection.appendChild(optionsGroup);
 
 				option = doc.createElement(Plugin.MT_XML_OPTION_ELEMENT_NAME);
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, "Debug");
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "Debug=true");
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, "Grouped option 1");
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_option2);
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "Debug=true"); //$NON-NLS-1$
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_option2_comment);
 				optionsGroup.appendChild(option);
 
 				option = doc.createElement(Plugin.MT_XML_OPTION_ELEMENT_NAME);
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, "Release");
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "Release=true");
-				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, "Grouped option 2");
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_option3);
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_COMMAND_ATTR, "Release=true"); //$NON-NLS-1$
+				option.setAttribute(Plugin.MT_XML_OPTION_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_option3_comment);
 				optionsGroup.appendChild(option);
 			}
 
@@ -201,8 +201,8 @@ public class AddTargetsFileAction extends Action
 		{
 			final Transformer serializer = TransformerFactory.newInstance().newTransformer();
 
-			serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-			serializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+			serializer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+			serializer.setOutputProperty(OutputKeys.STANDALONE, "yes"); //$NON-NLS-1$
 
 			serializer.transform(new DOMSource(doc), new StreamResult(oStream));
 
