@@ -38,11 +38,6 @@ public class AddTargetsFileAction extends Action
 	private final ImageDescriptor m_imageEditFileEnabled = Plugin.getImage("/icons/enabl/file_edit.gif");	//$NON-NLS-1$
 	private final ImageDescriptor m_imageAddFileDisabled = Plugin.getImage("/icons/disabl/file_add.gif"); //$NON-NLS-1$
 	
-	public AddTargetsFileAction()
-	{
-		super();
-	}
-
 	public void update()
 	{
 		setEnabled(Plugin.getInstance().getCurrentProject() != null);

@@ -1,6 +1,5 @@
 package maketargeter;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +14,8 @@ public class Plugin extends AbstractUIPlugin
 {
 
 	/////////////////////////////////////////////////////////////
+	public static final String PLUGIN_ID = "maketargeter"; //$NON-NLS-1$
+	
 	public static final String MT_TARGETS_FILE_NAME = "make.targets"; //$NON-NLS-1$
 
 	public static final String MT_XML_ROOT_ELEMENT_NAME = "makeTargetsDescription"; //$NON-NLS-1$
@@ -57,16 +58,7 @@ public class Plugin extends AbstractUIPlugin
 
 	public static ImageDescriptor getImage(String path)
 	{
-		URL url = null;
-
-		try
-		{
-			url = getInstance().getBundle().getEntry(path);
-		}
-		catch (IllegalStateException e)
-		{
-		}
-		return ImageDescriptor.createFromURL(url);
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
 	/////////////////////////////////////////////////////////////
