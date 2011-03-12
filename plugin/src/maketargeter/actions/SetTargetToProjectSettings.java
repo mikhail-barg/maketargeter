@@ -49,7 +49,6 @@ public class SetTargetToProjectSettings extends Action
 		}
 		catch (CoreException e)
 		{
-			// TODO Auto-generated catch block
 			throw new RuntimeException(e);
 		}
 	}
