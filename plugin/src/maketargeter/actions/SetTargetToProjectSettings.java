@@ -29,18 +29,18 @@ public class SetTargetToProjectSettings extends Action
 			return;
 		}
 		
-		ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project);
+		final ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project);
 		if (projectDescription == null)
 		{
 			throw new RuntimeException(Messages.SetTargetToProjectSettings_error1_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error1_2);
 		}
 		
-		IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
-		if (configuration.isManagedBuildOn())
-		{
-			//Don't change managed build - based projects
-			return;
-		}
+		final IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
+//		if (configuration.isManagedBuildOn())
+//		{
+//			//Don't change managed build - based projects
+//			return;
+//		}
 		
 		try
 		{
@@ -61,13 +61,15 @@ public class SetTargetToProjectSettings extends Action
 			return false;
 		}
 		
-		ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project, false);
-		if (projectDescription == null)
-		{
-			throw new RuntimeException(Messages.SetTargetToProjectSettings_error2_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error2_2);
-		}
-		IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
+		return true;
 		
-		return !configuration.isManagedBuildOn();
+//		ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project, false);
+//		if (projectDescription == null)
+//		{
+//			throw new RuntimeException(Messages.SetTargetToProjectSettings_error2_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error2_2);
+//		}
+//		IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
+//		
+//		return !configuration.isManagedBuildOn();
 	}
 }

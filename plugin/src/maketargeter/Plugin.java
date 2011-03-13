@@ -82,7 +82,7 @@ public class Plugin extends AbstractUIPlugin
 	/**
 	 * Sets a new current project
 	 * @param project can be null
-	 * @return true if given project and previously seletced are both not null and different 
+	 * @return true if given project and previously selected are both not null and different 
 	 */
 	boolean setCurrentProject(IProject project)
 	{

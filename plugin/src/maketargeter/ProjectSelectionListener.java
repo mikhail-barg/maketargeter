@@ -44,7 +44,8 @@ class ProjectSelectionListener implements ISelectionListener
 
 		try
 		{
-			if (project.hasNature(CProjectNature.C_NATURE_ID) || project.hasNature(CCProjectNature.CC_NATURE_ID)) //$NON-NLS-1$ 
+			if (project.hasNature(CProjectNature.C_NATURE_ID) 
+					|| project.hasNature(CCProjectNature.CC_NATURE_ID)) 
 			{
 				Plugin.getInstance().setCurrentProject(project);
 			}
