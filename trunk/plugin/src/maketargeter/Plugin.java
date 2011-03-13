@@ -1,11 +1,8 @@
 package maketargeter;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -39,21 +36,21 @@ public class Plugin extends AbstractUIPlugin
 	public static final String MT_TARGET_LINE_SEPARATOR = " "; //$NON-NLS-1$
 	public static final String MT_CAPTION_LINE_SEPARATOR = " "; //$NON-NLS-1$
 
-	private static Plugin m_plugin;
+	private static Plugin s_instance;
 
 	/////////////////////////////////////////////////////////////
 	public Plugin()
 	{
-		if (m_plugin != null)
+		if (s_instance != null)
 		{
 			throw new IllegalStateException(Messages.Plugin_error1);
 		}
-		m_plugin = this;
+		s_instance = this;
 	}
 
 	public static Plugin getInstance()
 	{
-		return m_plugin;
+		return s_instance;
 	}
 
 	public static ImageDescriptor getImage(String path)
@@ -63,120 +60,9 @@ public class Plugin extends AbstractUIPlugin
 
 	/////////////////////////////////////////////////////////////
 	
-	private final List<MainView> m_views = new LinkedList<MainView>();
-	private IProject m_currentProject;
-	private String m_targetString = ""; //$NON-NLS-1$
-	private String m_captionString = ""; //$NON-NLS-1$
+	MainView m_view;
 	private final Map<IProject, SelectedState> m_selectionStorage = new HashMap<IProject, SelectedState>();
 	private final ISelectedStateData EMPTY_SELECTION = new SelectedState();
-	
-
-	/**
-	 * @return currently selected project. Can be null;
-	 */
-	public IProject getCurrentProject()
-	{
-		return m_currentProject;
-	}
-	
-	/**
-	 * Sets a new current project
-	 * @param project can be null
-	 * @return true if given project and previously selected are both not null and different 
-	 */
-	boolean setCurrentProject(IProject project)
-	{
-		if (m_currentProject == null && project == null)
-		{
-			return false;
-		}
-		if (m_currentProject != null && m_currentProject.equals(project))
-		{
-			return false;
-		}
-	
-		m_currentProject = project;
-		
-		updateViews();
-		
-		return true;
-	}
-	
-	boolean isCurrentProjectOpened()
-	{
-		return Util.checkProjectOpen(m_currentProject);
-	}
-	
-	/**
-	 * @return file handle of a resource file. Can be null.
-	 */
-	public IFile getTragetsFile()
-	{
-		if (!isCurrentProjectOpened())
-		{
-			// bad project.. probably already closed or something
-			return null;
-		}
-
-		return m_currentProject.getFile(Plugin.MT_TARGETS_FILE_NAME);
-	}
-	
-	public boolean targetFileExists()
-	{
-		final IFile file = Plugin.getInstance().getTragetsFile();
-		return file != null && file.exists();  
-	}
-
-	void registerView(MainView view)
-	{
-		m_views.add(view);
-	}
-	
-	void removeView(MainView view)
-	{
-		m_views.remove(view);
-	}
-	
-	public void updateViews()
-	{
-		for (MainView view : m_views)
-		{
-			view.update();
-		}
-	}
-	
-	/** result is not null*/
-	public String getTargetString()
-	{
-		return m_targetString;
-	}
-	
-	/** param cannot be null*/
-	void setTargetString(String string)
-	{
-		if (string == null)
-		{
-			throw new NullPointerException(Messages.Plugin_error2);
-		}
-		m_targetString = string;
-	}
-
-	/** result is not null*/
-	public String getCaptionString()
-	{
-		return m_captionString;
-	}
-	
-	/** param cannot be null*/
-	void setCaptionString(String string)
-	{
-		if (string == null)
-		{
-			throw new NullPointerException(Messages.Plugin_error3);
-		}
-		m_captionString = string;
-	}
-	
 	
 	/**
 	 * Returns a selected state for the given project 
@@ -194,12 +80,6 @@ public class Plugin extends AbstractUIPlugin
 		return result;
 	}
 	
-	/** result can be null */
-	ISelectedStateData getSelectedStateForCurrentProject()
-	{
-		return getSelectedState(m_currentProject);
-	}
-	
 	void setSelectedState(IProject project, SelectedState state)
 	{
 		if (project == null)
@@ -207,10 +87,5 @@ public class Plugin extends AbstractUIPlugin
 			return;
 		}
 		m_selectionStorage.put(project, state);
-	}
-	
-	void setSelectedStateForCurrentProject(SelectedState state)
-	{
-		setSelectedState(m_currentProject, state);
 	}
 }

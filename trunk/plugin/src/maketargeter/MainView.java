@@ -18,6 +18,7 @@ import maketargeter.actions.CopyTargetToClipboardAction;
 import maketargeter.actions.SetTargetToProjectSettings;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
@@ -70,14 +71,39 @@ public class MainView extends ViewPart
 	private Action m_buildTargetAction;
 	private Action m_copyToClipboardAction;
 	private Action m_setToProjectAction;
+	
+	private ProjectSelectionListener m_projectSelectionListener;
 
-	private final SelectionListener m_selectionListener = new ButtonSelectionListener();
-	private final IExpansionListener m_expansionListener = new ExpansionListener();
+	private final SelectionListener m_selectionListener 
+		= new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					onSelectionChanged();
+				}
+			};
+		
+	private final IExpansionListener m_expansionListener 
+		= new ExpansionAdapter()
+			{
+				@Override
+				public void expansionStateChanged(ExpansionEvent e)
+				{
+					m_form.reflow(true);
+				}
+			};
 
 	private final List<Button> m_optionButtonsList = new LinkedList<Button>();
 	private final List<Group> m_optionGroupsList = new LinkedList<Group>(); 
 	
 	private boolean m_disableSelectionUpdates = false;
+	
+	/////////////////
+	private IProject m_currentProject;
+	private String m_targetString = ""; //$NON-NLS-1$
+	private String m_captionString = ""; //$NON-NLS-1$
+	/////////////////
 	
 	@Override
 	public void createPartControl(Composite parent)
@@ -115,10 +141,9 @@ public class MainView extends ViewPart
 			optionsSection.setClient(m_optionsGroup);
 		}
 
-		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(ProjectSelectionListener.INSTANCE);
+		m_projectSelectionListener = new ProjectSelectionListener(this);
+		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(m_projectSelectionListener);
 
-		Plugin.getInstance().registerView(this);
-		
 		update();
 	}
 
@@ -131,9 +156,7 @@ public class MainView extends ViewPart
 	@Override
 	public void dispose()
 	{
-		Plugin.getInstance().removeView(this);
-		
-		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(ProjectSelectionListener.INSTANCE);
+		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(m_projectSelectionListener);
 		m_toolkit.dispose();
 		
 		super.dispose();
@@ -144,11 +167,11 @@ public class MainView extends ViewPart
 	 */
 	private void initToolBar(Shell shell)
 	{
-		m_addTargetsFileAction = new AddTargetsFileAction();
-		m_addNewTargetAction = new AddNewTargetAction();
-		m_buildTargetAction = new BuildTargetAction(shell);
-		m_copyToClipboardAction = new CopyTargetToClipboardAction();
-		m_setToProjectAction = new SetTargetToProjectSettings();
+		m_addTargetsFileAction = new AddTargetsFileAction(this);
+		m_addNewTargetAction = new AddNewTargetAction(this);
+		m_buildTargetAction = new BuildTargetAction(this, shell);
+		m_copyToClipboardAction = new CopyTargetToClipboardAction(this);
+		m_setToProjectAction = new SetTargetToProjectSettings(this);
 
 		IToolBarManager tm = getViewSite().getActionBars().getToolBarManager();
 		tm.add(m_addTargetsFileAction);
@@ -161,7 +184,7 @@ public class MainView extends ViewPart
 	/**
 	 * 
 	 */
-	void update()
+	public void update()
 	{
 		m_addTargetsFileAction.update();
 		m_addNewTargetAction.setEnabled(false);
@@ -170,19 +193,17 @@ public class MainView extends ViewPart
 		m_setToProjectAction.setEnabled(false);
 		m_form.setVisible(false);
 		
-		final Plugin plugin = Plugin.getInstance(); 
-
-		if (!plugin.isCurrentProjectOpened())
+		if (!Util.checkProjectOpen(m_currentProject))
 		{
 			this.setContentDescription(Messages.MainView_no_project);
 			return;
 		}
 
-		this.setContentDescription(plugin.getCurrentProject().getName());
+		this.setContentDescription(m_currentProject.getName());
 
 		
 		
-		if (!plugin.targetFileExists())
+		if (!Util.isFileExists(Util.getTragetsFile(m_currentProject)))
 		{
 			return;
 		}
@@ -216,7 +237,7 @@ public class MainView extends ViewPart
 		try
 		{
 			m_disableSelectionUpdates = true;
-			parseFile(Plugin.getInstance().getTragetsFile());
+			parseFile(Util.getTragetsFile(m_currentProject));
 		}
 		finally
 		{
@@ -229,7 +250,7 @@ public class MainView extends ViewPart
 		m_addNewTargetAction.setEnabled(true);
 		m_buildTargetAction.setEnabled(true);
 		m_copyToClipboardAction.setEnabled(true);
-		m_setToProjectAction.setEnabled(SetTargetToProjectSettings.canBeEnabled());
+		m_setToProjectAction.setEnabled(true);
 	}
 	
 	/**
@@ -258,7 +279,7 @@ public class MainView extends ViewPart
 				throw new IllegalArgumentException(Messages.MainView_error1_1 + rootElement.getNodeName() + Messages.MainView_error1_2 + Plugin.MT_XML_ROOT_ELEMENT_NAME + Messages.MainView_error1_3);
 			}
 
-			ISelectedStateData selectedState = Plugin.getInstance().getSelectedStateForCurrentProject();
+			ISelectedStateData selectedState = Plugin.getInstance().getSelectedState(m_currentProject);
 			
 			// targets sections
 			{
@@ -465,9 +486,9 @@ public class MainView extends ViewPart
 		captionString = captionString + captionStringBuilder.toString().trim();
 		
 		m_form.setText(targetString);
-		Plugin.getInstance().setTargetString(targetString);
-		Plugin.getInstance().setCaptionString(captionString);
-		Plugin.getInstance().setSelectedStateForCurrentProject(selectedState);
+		setTargetString(targetString);
+		setCaptionString(captionString);
+		Plugin.getInstance().setSelectedState(m_currentProject, selectedState);
 	}
 
 	private boolean isButtonSelected(Button button)
@@ -475,22 +496,56 @@ public class MainView extends ViewPart
 		return (button != null && button.getSelection() && button.getData() != null);
 	}
 	
-	//////////////////////////////////////////////////////////
-	class ButtonSelectionListener extends SelectionAdapter
+	void setSelectedProject(IProject project)
 	{
-		@Override
-		public void widgetSelected(SelectionEvent e)
+		if (m_currentProject == null && project == null)
 		{
-			onSelectionChanged();
+			return;
 		}
+		if (m_currentProject != null && m_currentProject.equals(project))
+		{
+			return;
+		}
+	
+		m_currentProject = project;
+		
+		update();
 	}
 	
-	class ExpansionListener extends ExpansionAdapter
+	/** result is not null*/
+	public String getTargetString()
 	{
-		@Override
-		public void expansionStateChanged(ExpansionEvent e)
+		return m_targetString;
+	}
+	
+	/** param cannot be null*/
+	void setTargetString(String string)
+	{
+		if (string == null)
 		{
-			m_form.reflow(true);
+			throw new NullPointerException(Messages.Plugin_error2);
 		}
+		m_targetString = string;
+	}
+
+	/** result is not null*/
+	public String getCaptionString()
+	{
+		return m_captionString;
+	}
+	
+	/** param cannot be null*/
+	void setCaptionString(String string)
+	{
+		if (string == null)
+		{
+			throw new NullPointerException(Messages.Plugin_error3);
+		}
+		m_captionString = string;
+	}
+	
+	public IProject getCurrentProject()
+	{
+		return m_currentProject;
 	}
 }
