@@ -12,9 +12,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import maketargeter.MainView;
 import maketargeter.Plugin;
+import maketargeter.Util;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,11 +41,19 @@ public class AddTargetsFileAction extends Action
 	private final ImageDescriptor m_imageEditFileEnabled = Plugin.getImage("/icons/enabl/file_edit.gif");	//$NON-NLS-1$
 	private final ImageDescriptor m_imageAddFileDisabled = Plugin.getImage("/icons/disabl/file_add.gif"); //$NON-NLS-1$
 	
+	private final MainView m_view;
+	
+	public AddTargetsFileAction(MainView view)
+	{
+		m_view = view;
+	}
+	
 	public void update()
 	{
-		setEnabled(Plugin.getInstance().getCurrentProject() != null);
+		final IProject project = m_view.getCurrentProject();
+		setEnabled(project != null);
 		
-		if (Plugin.getInstance().targetFileExists())
+		if (Util.isFileExists(Util.getTragetsFile(project)))
 		{
 			setText(Messages.AddTargetsFileAction_action1);
 			setImageDescriptor(m_imageEditFileEnabled); 
@@ -67,7 +78,7 @@ public class AddTargetsFileAction extends Action
 						@Override
 						public void run(IProgressMonitor monitor) throws CoreException
 						{
-							if (!Plugin.getInstance().targetFileExists())
+							if (!Util.isFileExists(Util.getTragetsFile(m_view.getCurrentProject())))
 							{
 								processAddFile(monitor);
 							}
@@ -75,7 +86,7 @@ public class AddTargetsFileAction extends Action
 							openEditor();
 						}
 					},
-					Plugin.getInstance().getCurrentProject(),
+					m_view.getCurrentProject(),
 					IWorkspace.AVOID_UPDATE,
 					null);
 		}
@@ -87,11 +98,11 @@ public class AddTargetsFileAction extends Action
 	
 	private void openEditor()
 	{
-		final IFile file = Plugin.getInstance().getTragetsFile();
+		final IFile targetsFile = Util.getTragetsFile(m_view.getCurrentProject());
 		
 		try
 		{
-			org.eclipse.ui.ide.IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), file);
+			org.eclipse.ui.ide.IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), targetsFile);
 		}
 		catch (PartInitException e)
 		{
@@ -101,14 +112,14 @@ public class AddTargetsFileAction extends Action
 
 	private void processAddFile(IProgressMonitor monitor)
 	{
-		final IFile file = Plugin.getInstance().getTragetsFile();
+		final IFile targetsFile = Util.getTragetsFile(m_view.getCurrentProject());
 		
-		if (file == null)
+		if (targetsFile == null)
 		{
 			return;
 		}
 		
-		if (file.exists())
+		if (targetsFile.exists())
 		{ 
 			// already exist
 			return; 
@@ -169,7 +180,7 @@ public class AddTargetsFileAction extends Action
 				optionsGroup.appendChild(option);
 			}
 
-			writeDocumentToFile(doc, file, monitor);
+			writeDocumentToFile(doc, targetsFile, monitor);
 		}
 		catch (ParserConfigurationException e)
 		{
@@ -180,7 +191,7 @@ public class AddTargetsFileAction extends Action
 			e.printStackTrace();
 		}
 		
-		Plugin.getInstance().updateViews();
+		m_view.update(); //we need to update the view contents even though the project haven't changed
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package maketargeter.actions;
 
+import maketargeter.MainView;
 import maketargeter.Plugin;
 
 import org.eclipse.cdt.core.model.CoreModel;
@@ -13,17 +14,20 @@ import org.eclipse.jface.action.Action;
 
 public class SetTargetToProjectSettings extends Action
 {
-	public SetTargetToProjectSettings()
+	private final MainView m_view;
+	public SetTargetToProjectSettings(MainView view)
 	{
 		super(Messages.SetTargetToProjectSettings_action1);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/action-editconfig.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/action-editconfig.gif")); //$NON-NLS-1$
+		
+		m_view = view;
 	}
 
 	@Override
 	public void run()
 	{
-		final IProject project = Plugin.getInstance().getCurrentProject();
+		final IProject project = m_view.getCurrentProject();
 		if (project == null)
 		{
 			return;
@@ -32,7 +36,7 @@ public class SetTargetToProjectSettings extends Action
 		final ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project);
 		if (projectDescription == null)
 		{
-			throw new RuntimeException(Messages.SetTargetToProjectSettings_error1_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error1_2);
+			throw new RuntimeException(Messages.SetTargetToProjectSettings_error1_1 + project + Messages.SetTargetToProjectSettings_error1_2);
 		}
 		
 		final IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
@@ -44,32 +48,12 @@ public class SetTargetToProjectSettings extends Action
 		
 		try
 		{
-			configuration.getEditableBuilder().setBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, Plugin.getInstance().getTargetString());
+			configuration.getEditableBuilder().setBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, m_view.getTargetString());
 			CoreModel.getDefault().setProjectDescription(project, projectDescription);
 		}
 		catch (CoreException e)
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	public static boolean canBeEnabled()
-	{
-		final IProject project = Plugin.getInstance().getCurrentProject();
-		if (project == null)
-		{
-			return false;
-		}
-		
-		return true;
-		
-//		ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project, false);
-//		if (projectDescription == null)
-//		{
-//			throw new RuntimeException(Messages.SetTargetToProjectSettings_error2_1 + Plugin.getInstance().getCurrentProject() + Messages.SetTargetToProjectSettings_error2_2);
-//		}
-//		IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
-//		
-//		return !configuration.isManagedBuildOn();
 	}
 }

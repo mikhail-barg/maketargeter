@@ -1,5 +1,6 @@
 package maketargeter.actions;
 
+import maketargeter.MainView;
 import maketargeter.Plugin;
 import maketargeter.Util;
 
@@ -16,17 +17,21 @@ import org.eclipse.jface.action.Action;
  */
 public class AddNewTargetAction extends Action
 {
-	public AddNewTargetAction()
+	private final MainView m_view;
+	
+	public AddNewTargetAction(MainView view)
 	{
 		super(Messages.AddNewTargetAction_action1);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/target_add.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/target_add.gif")); //$NON-NLS-1$
+		
+		m_view = view;
 	}
 
 	@Override
 	public void run()
 	{
-		final IProject project = Plugin.getInstance().getCurrentProject();
+		final IProject project = m_view.getCurrentProject();
 		if (project == null)
 		{
 			return;
@@ -38,12 +43,12 @@ public class AddNewTargetAction extends Action
 		{
 			final IMakeTarget target = targetManager.createTarget(
 											project, 
-											getTargetName(targetManager, project, Plugin.getInstance().getCaptionString()), 
+											getTargetName(targetManager, project, m_view.getCaptionString()), 
 											Util.getTargetBuildId(targetManager, project));
 			target.setStopOnError(true);
 			target.setRunAllBuilders(true);
 			target.setUseDefaultBuildCmd(true);
-			target.setBuildAttribute(IMakeTarget.BUILD_TARGET, Plugin.getInstance().getTargetString());
+			target.setBuildAttribute(IMakeTarget.BUILD_TARGET, m_view.getTargetString());
 			targetManager.addTarget(project, target);
 		}
 		catch (CoreException e)

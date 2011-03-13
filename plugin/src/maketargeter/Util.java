@@ -6,6 +6,7 @@ package maketargeter;
 import java.util.Iterator;
 
 import org.eclipse.cdt.make.core.IMakeTargetManager;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
@@ -124,5 +125,25 @@ public class Util
 			return null;
 		}
 		return id[0];
+	}
+	
+	/**
+	 * @return file handle of a resource file. Can be null.
+	 */
+	public static IFile getTragetsFile(IProject project)
+	{
+		if (!checkProjectOpen(project))
+		{
+			// bad project.. probably already closed or something
+			return null;
+		}
+
+		return project.getFile(Plugin.MT_TARGETS_FILE_NAME);
+	}
+	
+	
+	public static boolean isFileExists(IFile file)
+	{
+		return file != null && file.exists();
 	}
 }

@@ -16,11 +16,12 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 class ProjectSelectionListener implements ISelectionListener
 {
+	private final MainView m_view;
 	
-	/** To prevent external instantiation. */
-	private ProjectSelectionListener() {}
-	
-	static final ProjectSelectionListener INSTANCE = new ProjectSelectionListener();
+	ProjectSelectionListener(MainView view)
+	{
+		m_view = view;
+	}
 	
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection)
@@ -47,11 +48,11 @@ class ProjectSelectionListener implements ISelectionListener
 			if (project.hasNature(CProjectNature.C_NATURE_ID) 
 					|| project.hasNature(CCProjectNature.CC_NATURE_ID)) 
 			{
-				Plugin.getInstance().setCurrentProject(project);
+				m_view.setSelectedProject(project);
 			}
 			else
 			{
-				Plugin.getInstance().setCurrentProject(null);
+				m_view.setSelectedProject(null);
 			}
 		}
 		catch (CoreException e)
