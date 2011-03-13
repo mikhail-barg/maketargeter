@@ -74,7 +74,7 @@ public class MainView extends ViewPart
 	
 	private ProjectSelectionListener m_projectSelectionListener;
 
-	private final SelectionListener m_selectionListener 
+	private final SelectionListener m_buttonSelectionListener 
 		= new SelectionAdapter()
 			{
 				@Override
@@ -100,10 +100,35 @@ public class MainView extends ViewPart
 	private boolean m_disableSelectionUpdates = false;
 	
 	/////////////////
+	private static enum State
+	{
+		/** 
+		 this is a normal working state,  
+		 during this state 
+		 m_currentProject contains reference to the currently selected project (can be null)
+		 m_parsingProject is null
+		 m_wantedProject is null
+		 */
+		STATE_ACTUAL,
+		
+		/**
+		 the view in this state when it switches to some other project.
+		 during this state 
+		 m_currentProject is null
+		 m_parsingProject contains reference to the project being currently processed
+		 m_wantedProject is null but can be set to some new project if project change happens during parse 
+		 */
+		STATE_UPDATING,
+	}
+	
+	private State m_state = State.STATE_ACTUAL;
 	private IProject m_currentProject;
+	private IProject m_parsingProject;
+	private IProject m_wantedProject;
 	private String m_targetString = ""; //$NON-NLS-1$
 	private String m_captionString = ""; //$NON-NLS-1$
 	/////////////////
+
 	
 	@Override
 	public void createPartControl(Composite parent)
@@ -144,13 +169,7 @@ public class MainView extends ViewPart
 		m_projectSelectionListener = new ProjectSelectionListener(this);
 		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(m_projectSelectionListener);
 
-		update();
-	}
-
-	@Override
-	public void setFocus()
-	{
-		m_form.setFocus();
+		updateActionsAndForm();
 	}
 
 	@Override
@@ -162,9 +181,12 @@ public class MainView extends ViewPart
 		super.dispose();
 	}
 
-	/**
-	 * @param shell
-	 */
+	@Override
+	public void setFocus()
+	{
+		m_form.setFocus();
+	}
+
 	private void initToolBar(Shell shell)
 	{
 		m_addTargetsFileAction = new AddTargetsFileAction(this);
@@ -180,64 +202,159 @@ public class MainView extends ViewPart
 		tm.add(m_buildTargetAction);
 		tm.add(m_copyToClipboardAction);
 	}
+	
+	private void updateActionsAndForm()
+	{
+		switch (m_state)
+		{
+		case STATE_UPDATING:
+			m_addTargetsFileAction.update();
+			m_addTargetsFileAction.setEnabled(false);
+			m_addNewTargetAction.setEnabled(false);
+			m_buildTargetAction.setEnabled(false);
+			m_copyToClipboardAction.setEnabled(false);
+			m_setToProjectAction.setEnabled(false);
+			m_form.setVisible(false);
+			setContentDescription("Updating, please wait..");
+			break;
+			
+		case STATE_ACTUAL:
+			{
+				final boolean hasProject = Util.checkProjectOpen(m_currentProject);
+				m_addTargetsFileAction.update();
+				m_addTargetsFileAction.setEnabled(hasProject);
+				if (hasProject)
+				{
+					final boolean hasFile = Util.isFileExists(Util.getTragetsFile(m_currentProject));
+					m_addNewTargetAction.setEnabled(hasFile);
+					m_buildTargetAction.setEnabled(hasFile);
+					m_copyToClipboardAction.setEnabled(hasFile);
+					m_setToProjectAction.setEnabled(hasFile);
+					m_form.setVisible(hasFile);
+					setContentDescription(m_currentProject.getName());
+				}
+				else
+				{
+					m_addNewTargetAction.setEnabled(false);
+					m_buildTargetAction.setEnabled(false);
+					m_copyToClipboardAction.setEnabled(false);
+					m_setToProjectAction.setEnabled(false);
+					m_form.setVisible(false);
+					this.setContentDescription(Messages.MainView_no_project);
+				}
+			}
+			break;
+		}
+	}
 
+	/**
+	 * Method to be called when we want to notify view that it should 
+	 * update the contents because the targets file could have been changed.
+	 */
+	public void onTargetsFileChanged()
+	{
+		update(m_currentProject, true);
+	}
+	
 	/**
 	 * 
 	 */
-	public void update()
+	private void update(IProject newProject, boolean forceReparse)
 	{
-		m_addTargetsFileAction.update();
-		m_addNewTargetAction.setEnabled(false);
-		m_buildTargetAction.setEnabled(false);
-		m_copyToClipboardAction.setEnabled(false);
-		m_setToProjectAction.setEnabled(false);
-		m_form.setVisible(false);
-		
-		if (!Util.checkProjectOpen(m_currentProject))
+		synchronized (m_state)
 		{
-			this.setContentDescription(Messages.MainView_no_project);
-			return;
-		}
-
-		this.setContentDescription(m_currentProject.getName());
-
-		
-		
-		if (!Util.isFileExists(Util.getTragetsFile(m_currentProject)))
-		{
-			return;
-		}
-
-		/*
-		IWorkspaceRunnable runnable = new IWorkspaceRunnable()
+			System.out.println("update[" + m_state + "] (" + newProject + ", " + forceReparse + ")");
+			switch (m_state)
 			{
-				public void run(IProgressMonitor monitor) throws CoreException
+			case STATE_ACTUAL:
+				if (!forceReparse)
 				{
-					processParse();
+					if (m_currentProject == null && newProject == null)
+					{
+						//equal, nothing to do
+						return;
+					}
+					if (m_currentProject != null && m_currentProject.equals(newProject))
+					{
+						//equal, nothing to do
+						return;
+					}
 				}
-			};
+				//different, so we have something to do!
+				m_currentProject = null;
+				m_wantedProject = null;
+				m_parsingProject = null;
+				//start parsing!
+				m_parsingProject = newProject;
+				m_state = State.STATE_UPDATING;	
+				break;
+				
+			case STATE_UPDATING:
+				if (!forceReparse && m_parsingProject.equals(newProject))
+				{
+					//equal, no need to update
+					m_wantedProject = null;
+					return;
+				}
+				//there's a new one we'll need to update to it.
+				m_wantedProject = newProject;
+				break;
+			}
+			
+			System.out.println("will process now");
+		}
 
+		//ok, out of sync part, we now need to assure we'll get to actual state after we leave it.
 		try
 		{
-			ResourcesPlugin.getWorkspace().run(runnable, m_project, IWorkspace.AVOID_UPDATE, null);
+			updateActionsAndForm();
+			
+			if (!Util.checkProjectOpen(m_parsingProject))
+			{
+				return;	//not much to do..
+			}
+			final IFile targetsFile = Util.getTragetsFile(m_parsingProject); 
+			if (!Util.isFileExists(targetsFile))
+			{
+				return;
+			}
+			processParse(targetsFile);
 		}
-		catch (CoreException e)
+		finally
 		{
-			e.printStackTrace();
+			IProject restartWithProject = null; 
+			synchronized (m_state)
+			{
+				m_currentProject = m_parsingProject;
+				m_parsingProject = null;
+				if (m_wantedProject != null)
+				{
+					restartWithProject = m_wantedProject;
+					m_wantedProject = null;
+				}
+				m_state = State.STATE_ACTUAL;
+			}
+			if (restartWithProject != null)
+			{
+				update(restartWithProject, false);
+			}
+			else
+			{
+				updateActionsAndForm();
+			}
 		}
-		*/
-		processParse();
+		//no code past this line because of "returns" in the try block
 	}
 
 	/**
 	 * 
 	 */
-	private void processParse()
+	private void processParse(IFile targetsFile)
 	{
 		try
 		{
 			m_disableSelectionUpdates = true;
-			parseFile(Util.getTragetsFile(m_currentProject));
+			parseFile(targetsFile);
 		}
 		finally
 		{
@@ -245,12 +362,6 @@ public class MainView extends ViewPart
 		}
 		
 		onSelectionChanged();
-		
-		m_form.setVisible(true);
-		m_addNewTargetAction.setEnabled(true);
-		m_buildTargetAction.setEnabled(true);
-		m_copyToClipboardAction.setEnabled(true);
-		m_setToProjectAction.setEnabled(true);
 	}
 	
 	/**
@@ -417,7 +528,7 @@ public class MainView extends ViewPart
 		final Button button = m_toolkit.createButton(groupControl, caption, isRadio? SWT.RADIO : SWT.CHECK);
 		button.setData(command);
 		button.setToolTipText(hint);
-		button.addSelectionListener(m_selectionListener);
+		button.addSelectionListener(m_buttonSelectionListener);
 		return button;
 	}
 	
@@ -496,20 +607,9 @@ public class MainView extends ViewPart
 		return (button != null && button.getSelection() && button.getData() != null);
 	}
 	
-	void setSelectedProject(IProject project)
+	public void onSelectedProjectChanged(IProject project)
 	{
-		if (m_currentProject == null && project == null)
-		{
-			return;
-		}
-		if (m_currentProject != null && m_currentProject.equals(project))
-		{
-			return;
-		}
-	
-		m_currentProject = project;
-		
-		update();
+		update(project, false);
 	}
 	
 	/** result is not null*/
@@ -549,3 +649,22 @@ public class MainView extends ViewPart
 		return m_currentProject;
 	}
 }
+
+/*
+IWorkspaceRunnable runnable = new IWorkspaceRunnable()
+	{
+		public void run(IProgressMonitor monitor) throws CoreException
+		{
+			processParse();
+		}
+	};
+
+try
+{
+	ResourcesPlugin.getWorkspace().run(runnable, m_project, IWorkspace.AVOID_UPDATE, null);
+}
+catch (CoreException e)
+{
+	e.printStackTrace();
+}
+*/

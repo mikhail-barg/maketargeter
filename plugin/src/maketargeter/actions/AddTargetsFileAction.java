@@ -191,7 +191,7 @@ public class AddTargetsFileAction extends Action
 			e.printStackTrace();
 		}
 		
-		m_view.update(); //we need to update the view contents even though the project haven't changed
+		m_view.onTargetsFileChanged(); //we need to update the view contents even though the project haven't changed
 	}
 
 	/**

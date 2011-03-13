@@ -34,7 +34,7 @@ class ProjectSelectionListener implements ISelectionListener
 			return;
 		}
 
-		IProject project = Util.findFirstOpenProjectBySelectedResource((IStructuredSelection) selection);
+		IProject project = Util.findFirstProjectBySelectedResource((IStructuredSelection) selection);
 
 		if (project == null)
 		{
@@ -45,14 +45,17 @@ class ProjectSelectionListener implements ISelectionListener
 
 		try
 		{
-			if (project.hasNature(CProjectNature.C_NATURE_ID) 
-					|| project.hasNature(CCProjectNature.CC_NATURE_ID)) 
+			if ( Util.checkProjectOpen(project)
+					&& (project.hasNature(CProjectNature.C_NATURE_ID) 
+							|| project.hasNature(CCProjectNature.CC_NATURE_ID)
+						)
+				) 
 			{
-				m_view.setSelectedProject(project);
+				m_view.onSelectedProjectChanged(project);
 			}
 			else
 			{
-				m_view.setSelectedProject(null);
+				m_view.onSelectedProjectChanged(null);
 			}
 		}
 		catch (CoreException e)

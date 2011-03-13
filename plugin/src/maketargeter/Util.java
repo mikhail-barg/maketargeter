@@ -37,7 +37,7 @@ public class Util
 	 * @param selection
 	 * @return
 	 */
-	static IProject findFirstOpenProjectBySelectedResource(IStructuredSelection selection)
+	static IProject findFirstProjectBySelectedResource(IStructuredSelection selection)
 	{
 		for (Iterator<?> e = selection.iterator(); e.hasNext();)
 		{
@@ -58,10 +58,14 @@ public class Util
 			
 			//found resource
 			IProject project = resource.getProject();
-			if (checkProjectOpen(project))
+			if (project != null)
 			{
 				return project;
 			}
+//			if (checkProjectOpen(project))
+//			{
+//				return project;
+//			}
 		}
 		return null;
 	}
