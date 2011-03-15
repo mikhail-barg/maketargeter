@@ -20,6 +20,10 @@ import maketargeter.actions.SetTargetToProjectSettings;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
@@ -32,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
@@ -97,7 +102,41 @@ public class MainView extends ViewPart
 	private final List<Button> m_optionButtonsList = new LinkedList<Button>();
 	private final List<Group> m_optionGroupsList = new LinkedList<Group>(); 
 	
-	private boolean m_disableSelectionUpdates = false;
+	////////////////////////////////////////////////////////////////////////////////////////
+	private static class UpdateJob extends Job
+	{
+		private final IProject m_newProject;
+		private final boolean m_forceReparse;
+		private final MainView m_view;
+		
+		public UpdateJob(MainView view, IProject newProject, boolean forceReparse)
+		{
+			super("Updating MakeTargeter contents for project " + (newProject == null? null      : newProject.getName()));
+			m_view = view;
+			m_newProject = newProject;
+			m_forceReparse = forceReparse;
+			this.setPriority(SHORT);
+		}
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor)
+		{
+			monitor.beginTask("", 1);
+			PlatformUI.getWorkbench().getDisplay().syncExec(
+				new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						m_view.update(m_newProject, m_forceReparse);
+					}
+				});
+			monitor.done();
+			return Status.OK_STATUS;
+		}
+		
+	}
+	////////////////////////////////////////////////////////////////////////////////////////	
 	
 	/////////////////
 	private static enum State
@@ -127,6 +166,7 @@ public class MainView extends ViewPart
 	private IProject m_wantedProject;
 	private String m_targetString = ""; //$NON-NLS-1$
 	private String m_captionString = ""; //$NON-NLS-1$
+	private boolean m_disableSelectionUpdates = false;
 	/////////////////
 
 	
@@ -253,17 +293,28 @@ public class MainView extends ViewPart
 	 */
 	public void onTargetsFileChanged()
 	{
-		update(m_currentProject, true);
+		scheduleUpdate(m_currentProject, true);
+	}
+	
+	public void onSelectedProjectChanged(IProject project)
+	{
+		scheduleUpdate(project, false);
+	}
+	
+	private void scheduleUpdate(IProject newProject, boolean forceReparse)
+	{
+		final Job job = new UpdateJob(this, newProject, forceReparse);
+		job.schedule();
 	}
 	
 	/**
-	 * 
+	 * not to be run directly, run via call to scheduleUpdate() 
 	 */
 	private void update(IProject newProject, boolean forceReparse)
 	{
 		synchronized (m_state)
 		{
-			System.out.println("update[" + m_state + "] (" + newProject + ", " + forceReparse + ")");
+			//System.out.println("update[" + m_state + "] (" + newProject + ", " + forceReparse + ")");
 			switch (m_state)
 			{
 			case STATE_ACTUAL:
@@ -301,7 +352,7 @@ public class MainView extends ViewPart
 				break;
 			}
 			
-			System.out.println("will process now");
+			//System.out.println("will process now");
 		}
 
 		//ok, out of sync part, we now need to assure we'll get to actual state after we leave it.
@@ -607,11 +658,6 @@ public class MainView extends ViewPart
 		return (button != null && button.getSelection() && button.getData() != null);
 	}
 	
-	public void onSelectedProjectChanged(IProject project)
-	{
-		update(project, false);
-	}
-	
 	/** result is not null*/
 	public String getTargetString()
 	{
@@ -648,6 +694,7 @@ public class MainView extends ViewPart
 	{
 		return m_currentProject;
 	}
+	
 }
 
 /*
