@@ -38,7 +38,7 @@ class ProjectSelectionListener implements ISelectionListener
 
 		if (project == null)
 		{
-			// TODO: try some other ways to get the project, for example from the IWorkbenchPart though it could be too much overhead for no reason
+			//try some other ways to get the project, for example from the IWorkbenchPart though it could be too much overhead for no reason
 			return;
 		}
 
