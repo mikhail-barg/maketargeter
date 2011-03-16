@@ -23,5 +23,14 @@
             priority="normal">
       </content-type>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.cdt.ui.CPerspective">
+         <viewShortcut
+               id="MakeTargeter.view">
+         </viewShortcut>
+      </perspectiveExtension>
+   </extension>
 
 </plugin>
