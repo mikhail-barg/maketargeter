@@ -18,11 +18,13 @@ import maketargeter.Util;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PartInitException;
@@ -37,6 +39,42 @@ import org.w3c.dom.Element;
  */
 public class AddTargetsFileAction extends Action
 {
+	private static final class AddFileJob extends WorkspaceJob
+	{
+		private final MainView m_view;
+		final IFile m_targetsFile;
+		
+		public AddFileJob(MainView view)
+		{
+			super("Adding targets file");
+			m_view = view;
+			m_targetsFile = Util.getTragetsFile(m_view.getCurrentProject());
+			setRule(ResourcesPlugin.getWorkspace().getRuleFactory().createRule(m_targetsFile));
+		}
+
+		@Override
+		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+		{
+			monitor.beginTask("", 3);
+			
+			IStatus subtaskStatus = processAddFile(m_targetsFile, monitor);
+			
+			if (subtaskStatus != Status.OK_STATUS)
+			{
+				monitor.done();
+				return subtaskStatus;
+			}
+			
+			m_view.onTargetsFileChanged();
+			monitor.worked(1);
+			
+			openEditor(m_targetsFile);
+			monitor.done();
+			return Status.OK_STATUS;
+		}
+	}
+	
+	
 	private final ImageDescriptor m_imageAddFileEnabled = Plugin.getImage("/icons/enabl/file_add.gif");	//$NON-NLS-1$
 	private final ImageDescriptor m_imageEditFileEnabled = Plugin.getImage("/icons/enabl/file_edit.gif");	//$NON-NLS-1$
 	private final ImageDescriptor m_imageAddFileDisabled = Plugin.getImage("/icons/disabl/file_add.gif"); //$NON-NLS-1$
@@ -70,59 +108,55 @@ public class AddTargetsFileAction extends Action
 	@Override
 	public void run()
 	{
-		try
-		{
-			ResourcesPlugin.getWorkspace().run(
-					new IWorkspaceRunnable()
-					{
-						@Override
-						public void run(IProgressMonitor monitor) throws CoreException
-						{
-							if (!Util.isFileExists(Util.getTragetsFile(m_view.getCurrentProject())))
-							{
-								processAddFile(monitor);
-							}
-							
-							openEditor();
-						}
-					},
-					m_view.getCurrentProject(),
-					IWorkspace.AVOID_UPDATE,
-					null);
-		}
-		catch (CoreException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	private void openEditor()
-	{
 		final IFile targetsFile = Util.getTragetsFile(m_view.getCurrentProject());
-		
-		try
-		{
-			org.eclipse.ui.ide.IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), targetsFile);
-		}
-		catch (PartInitException e)
-		{
-			throw new RuntimeException(Messages.AddTargetsFileAction_error1);
-		}
-	}
-
-	private void processAddFile(IProgressMonitor monitor)
-	{
-		final IFile targetsFile = Util.getTragetsFile(m_view.getCurrentProject());
-		
 		if (targetsFile == null)
 		{
 			return;
 		}
 		
+		if (!Util.isFileExists(targetsFile))
+		{
+			final Job job = new AddFileJob(m_view);
+			job.schedule();
+		}
+		else
+		{
+			openEditor(targetsFile);
+		}
+	}
+	
+	private static void openEditor(final IFile targetsFile)
+	{
+		PlatformUI.getWorkbench().getDisplay().syncExec(
+			new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						try
+						{
+							//should be called from UI thread because of getActiveWorkbenchWindow();
+							org.eclipse.ui.ide.IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), targetsFile);
+						}
+						catch (PartInitException e)
+						{
+							throw new RuntimeException(Messages.AddTargetsFileAction_error1);
+						}
+					}
+				});
+	}
+
+	private static IStatus processAddFile(IFile targetsFile, IProgressMonitor monitor)
+	{
+		if (targetsFile == null)
+		{
+			return new Status(IStatus.WARNING, Plugin.PLUGIN_ID, "Bad targets file");
+		}
+		
 		if (targetsFile.exists())
 		{ 
 			// already exist
-			return; 
+			return new Status(IStatus.WARNING, Plugin.PLUGIN_ID, "Targets file already exists");
 		}
 
 		try
@@ -180,18 +214,17 @@ public class AddTargetsFileAction extends Action
 				optionsGroup.appendChild(option);
 			}
 
-			writeDocumentToFile(doc, targetsFile, monitor);
+			monitor.worked(1);
+			return writeDocumentToFile(doc, targetsFile, monitor);
 		}
 		catch (ParserConfigurationException e)
 		{
-			e.printStackTrace();
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to create targets file", e);
 		}
 		catch (DOMException e)
 		{
-			e.printStackTrace();
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to create targets file", e);
 		}
-		
-		m_view.onTargetsFileChanged(); //we need to update the view contents even though the project haven't changed
 	}
 
 	/**
@@ -199,7 +232,7 @@ public class AddTargetsFileAction extends Action
 	 * @param file
 	 * @param monitor
 	 */
-	private void writeDocumentToFile(Document doc, IFile file, IProgressMonitor monitor)
+	private static IStatus writeDocumentToFile(Document doc, IFile file, IProgressMonitor monitor)
 	{
 		final ByteArrayOutputStream oStream = new ByteArrayOutputStream();
 
@@ -215,7 +248,7 @@ public class AddTargetsFileAction extends Action
 		}
 		catch (TransformerException e)
 		{
-			e.printStackTrace();
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to save targets file", e);
 		}
 
 		try
@@ -224,7 +257,10 @@ public class AddTargetsFileAction extends Action
 		}
 		catch (CoreException e)
 		{
-			e.printStackTrace();
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to save targets file", e);
 		}
+		
+		monitor.worked(1);
+		return Status.OK_STATUS;
 	}
 }
