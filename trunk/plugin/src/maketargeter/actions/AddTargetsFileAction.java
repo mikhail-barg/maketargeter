@@ -46,7 +46,7 @@ public class AddTargetsFileAction extends Action
 		
 		public AddFileJob(MainView view)
 		{
-			super("Adding targets file");
+			super(Messages.AddTargetsFileAction_adding_targets_file);
 			m_view = view;
 			m_targetsFile = Util.getTragetsFile(m_view.getCurrentProject());
 			setRule(ResourcesPlugin.getWorkspace().getRuleFactory().createRule(m_targetsFile));
@@ -55,7 +55,7 @@ public class AddTargetsFileAction extends Action
 		@Override
 		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 		{
-			monitor.beginTask("", 3);
+			monitor.beginTask("", 3); //$NON-NLS-1$
 			
 			IStatus subtaskStatus = processAddFile(m_targetsFile, monitor);
 			
@@ -150,13 +150,13 @@ public class AddTargetsFileAction extends Action
 	{
 		if (targetsFile == null)
 		{
-			return new Status(IStatus.WARNING, Plugin.PLUGIN_ID, "Bad targets file");
+			return new Status(IStatus.WARNING, Plugin.PLUGIN_ID, Messages.AddTargetsFileAction_error_bad_targets_file);
 		}
 		
 		if (targetsFile.exists())
 		{ 
 			// already exist
-			return new Status(IStatus.WARNING, Plugin.PLUGIN_ID, "Targets file already exists");
+			return new Status(IStatus.WARNING, Plugin.PLUGIN_ID, Messages.AddTargetsFileAction_error_targets_file_already_exists);
 		}
 
 		try
@@ -219,11 +219,11 @@ public class AddTargetsFileAction extends Action
 		}
 		catch (ParserConfigurationException e)
 		{
-			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to create targets file", e);
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, Messages.AddTargetsFileAction_error_failed_to_create_targets_file, e);
 		}
 		catch (DOMException e)
 		{
-			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to create targets file", e);
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, Messages.AddTargetsFileAction_error_failed_to_create_targets_file, e);
 		}
 	}
 
@@ -248,7 +248,7 @@ public class AddTargetsFileAction extends Action
 		}
 		catch (TransformerException e)
 		{
-			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to save targets file", e);
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, Messages.AddTargetsFileAction_error_failed_to_save_targets_file, e);
 		}
 
 		try
@@ -257,7 +257,7 @@ public class AddTargetsFileAction extends Action
 		}
 		catch (CoreException e)
 		{
-			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "Failed to save targets file", e);
+			return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, Messages.AddTargetsFileAction_error_failed_to_save_targets_file, e);
 		}
 		
 		monitor.worked(1);
