@@ -704,21 +704,3 @@ public class MainView extends ViewPart
 	
 }
 
-/*
-IWorkspaceRunnable runnable = new IWorkspaceRunnable()
-	{
-		public void run(IProgressMonitor monitor) throws CoreException
-		{
-			processParse();
-		}
-	};
-
-try
-{
-	ResourcesPlugin.getWorkspace().run(runnable, m_project, IWorkspace.AVOID_UPDATE, null);
-}
-catch (CoreException e)
-{
-	e.printStackTrace();
-}
-*/
