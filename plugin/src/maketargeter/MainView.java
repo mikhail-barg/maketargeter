@@ -15,6 +15,7 @@ import maketargeter.actions.AddNewTargetAction;
 import maketargeter.actions.AddTargetsFileAction;
 import maketargeter.actions.BuildTargetAction;
 import maketargeter.actions.CopyTargetToClipboardAction;
+import maketargeter.actions.RefreshViewAction;
 import maketargeter.actions.SetTargetToProjectSettings;
 
 import org.eclipse.core.resources.IFile;
@@ -76,6 +77,7 @@ public class MainView extends ViewPart
 	private Action m_buildTargetAction;
 	private Action m_copyToClipboardAction;
 	private Action m_setToProjectAction;
+	private Action m_refreshViewAction;
 	
 	private ProjectSelectionListener m_projectSelectionListener;
 
@@ -234,6 +236,7 @@ public class MainView extends ViewPart
 		m_buildTargetAction = new BuildTargetAction(this, shell);
 		m_copyToClipboardAction = new CopyTargetToClipboardAction(this);
 		m_setToProjectAction = new SetTargetToProjectSettings(this);
+		m_refreshViewAction = new RefreshViewAction(this);
 
 		IToolBarManager tm = getViewSite().getActionBars().getToolBarManager();
 		tm.add(m_addTargetsFileAction);
@@ -241,6 +244,7 @@ public class MainView extends ViewPart
 		tm.add(m_addNewTargetAction);
 		tm.add(m_buildTargetAction);
 		tm.add(m_copyToClipboardAction);
+		tm.add(m_refreshViewAction);
 	}
 	
 	private void updateActionsAndForm()
@@ -254,6 +258,7 @@ public class MainView extends ViewPart
 			m_buildTargetAction.setEnabled(false);
 			m_copyToClipboardAction.setEnabled(false);
 			m_setToProjectAction.setEnabled(false);
+			m_refreshViewAction.setEnabled(false);
 			m_form.setVisible(false);
 			setContentDescription("Updating, please wait..");
 			break;
@@ -270,6 +275,7 @@ public class MainView extends ViewPart
 					m_buildTargetAction.setEnabled(hasFile);
 					m_copyToClipboardAction.setEnabled(hasFile);
 					m_setToProjectAction.setEnabled(hasFile);
+					m_refreshViewAction.setEnabled(hasFile);
 					m_form.setVisible(hasFile);
 					setContentDescription(m_currentProject.getName());
 				}
@@ -279,6 +285,7 @@ public class MainView extends ViewPart
 					m_buildTargetAction.setEnabled(false);
 					m_copyToClipboardAction.setEnabled(false);
 					m_setToProjectAction.setEnabled(false);
+					m_refreshViewAction.setEnabled(false);
 					m_form.setVisible(false);
 					this.setContentDescription(Messages.MainView_no_project);
 				}
