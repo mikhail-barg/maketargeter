@@ -11,6 +11,8 @@ public class Messages extends NLS
 	public static String MainView_no_project;
 	public static String MainView_options_section;
 	public static String MainView_targets_section;
+	public static String MainView_updating_vew_status;
+	public static String MainView_updating_view_task;
 	public static String Plugin_error1;
 	public static String Plugin_error2;
 	public static String Plugin_error3;

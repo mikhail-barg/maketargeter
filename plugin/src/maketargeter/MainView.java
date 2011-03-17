@@ -113,7 +113,7 @@ public class MainView extends ViewPart
 		
 		public UpdateJob(MainView view, IProject newProject, boolean forceReparse)
 		{
-			super("Updating MakeTargeter contents for project " + (newProject == null? null      : newProject.getName()));
+			super(Messages.MainView_updating_view_task + (newProject == null? null      : newProject.getName()));
 			m_view = view;
 			m_newProject = newProject;
 			m_forceReparse = forceReparse;
@@ -123,7 +123,7 @@ public class MainView extends ViewPart
 		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
-			monitor.beginTask("", 1);
+			monitor.beginTask("", 1); //$NON-NLS-1$
 			PlatformUI.getWorkbench().getDisplay().syncExec(
 				new Runnable()
 				{
@@ -260,7 +260,7 @@ public class MainView extends ViewPart
 			m_setToProjectAction.setEnabled(false);
 			m_refreshViewAction.setEnabled(false);
 			m_form.setVisible(false);
-			setContentDescription("Updating, please wait..");
+			setContentDescription(Messages.MainView_updating_vew_status);
 			break;
 			
 		case STATE_ACTUAL:

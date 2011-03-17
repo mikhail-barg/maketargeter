@@ -14,7 +14,7 @@ public class RefreshViewAction extends Action
 	
 	public RefreshViewAction(MainView view)
 	{
-		super("Refresh view");
+		super(Messages.RefreshViewAction_title);
 		setImageDescriptor(Plugin.getImage("/icons/enabl/refresh.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(Plugin.getImage("/icons/disabl/refresh.gif")); //$NON-NLS-1$
 		
