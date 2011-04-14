@@ -239,12 +239,12 @@ public class MainView extends ViewPart
 		m_refreshViewAction = new RefreshViewAction(this);
 
 		IToolBarManager tm = getViewSite().getActionBars().getToolBarManager();
-		tm.add(m_addTargetsFileAction);
+		tm.add(m_buildTargetAction);
 		tm.add(m_setToProjectAction);
 		tm.add(m_addNewTargetAction);
-		tm.add(m_buildTargetAction);
 		tm.add(m_copyToClipboardAction);
 		tm.add(m_refreshViewAction);
+		tm.add(m_addTargetsFileAction);
 	}
 	
 	private void updateActionsAndForm()
