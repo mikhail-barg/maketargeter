@@ -59,52 +59,7 @@ import org.xml.sax.SAXException;
  */
 public class MainView extends ViewPart
 {
-	private static final int SECTION_STYLE = ExpandableComposite.TWISTIE
-												| ExpandableComposite.TITLE_BAR 
-												| ExpandableComposite.TITLE_BAR
-												/* | ExpandableComposite.CLIENT_INDENT | Section.DESCRIPTION */
-												;
-	private static final int GROUP_STYLE = SWT.SHADOW_NONE;
-	
-	private FormToolkit m_toolkit;
-	private ScrolledForm m_form;
-
-	private Group m_targetsGroup;
-	private Group m_optionsGroup;
-
-	private AddTargetsFileAction m_addTargetsFileAction;
-	private Action m_addNewTargetAction;
-	private Action m_buildTargetAction;
-	private Action m_copyToClipboardAction;
-	private Action m_setToProjectAction;
-	private Action m_refreshViewAction;
-	
-	private ProjectSelectionListener m_projectSelectionListener;
-
-	private final SelectionListener m_buttonSelectionListener 
-		= new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					onSelectionChanged();
-				}
-			};
-		
-	private final IExpansionListener m_expansionListener 
-		= new ExpansionAdapter()
-			{
-				@Override
-				public void expansionStateChanged(ExpansionEvent e)
-				{
-					m_form.reflow(true);
-				}
-			};
-
-	private final List<Button> m_optionButtonsList = new LinkedList<Button>();
-	private final List<Group> m_optionGroupsList = new LinkedList<Group>(); 
-	
-	////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 	private static class UpdateJob extends Job
 	{
 		private final IProject m_newProject;
@@ -169,8 +124,54 @@ public class MainView extends ViewPart
 	private String m_targetString = ""; //$NON-NLS-1$
 	private String m_captionString = ""; //$NON-NLS-1$
 	private boolean m_disableSelectionUpdates = false;
-	/////////////////
+	/////////////////	
+	
+	
+	private static final int SECTION_STYLE = ExpandableComposite.TWISTIE
+												| ExpandableComposite.TITLE_BAR 
+												| ExpandableComposite.TITLE_BAR
+												/* | ExpandableComposite.CLIENT_INDENT | Section.DESCRIPTION */
+												;
+	private static final int GROUP_STYLE = SWT.SHADOW_NONE;
+	
+	private FormToolkit m_toolkit;
+	private ScrolledForm m_form;
 
+	private Group m_targetsGroup;
+	private Group m_optionsGroup;
+
+	private AddTargetsFileAction m_addTargetsFileAction;
+	private Action m_addNewTargetAction;
+	private Action m_buildTargetAction;
+	private Action m_copyToClipboardAction;
+	private Action m_setToProjectAction;
+	private Action m_refreshViewAction;
+	
+	private ProjectSelectionListener m_projectSelectionListener;
+
+	private final SelectionListener m_buttonSelectionListener 
+		= new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					onSelectionChanged();
+				}
+			};
+		
+	private final IExpansionListener m_expansionListener 
+		= new ExpansionAdapter()
+			{
+				@Override
+				public void expansionStateChanged(ExpansionEvent e)
+				{
+					m_form.reflow(true);
+				}
+			};
+
+	private final List<Button> m_optionButtonsList = new LinkedList<Button>();
+	private final List<Group> m_optionGroupsList = new LinkedList<Group>(); 
+	
 	
 	@Override
 	public void createPartControl(Composite parent)
