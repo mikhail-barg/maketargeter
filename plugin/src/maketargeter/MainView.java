@@ -121,8 +121,7 @@ public class MainView extends ViewPart
 	private IProject m_currentProject;
 	private IProject m_parsingProject;
 	private IProject m_wantedProject;
-	private String m_targetString = ""; //$NON-NLS-1$
-	private String m_buildCommand = ""; //$NON-NLS-1$
+	private TargetDescription m_targetDesciption;
 	private String m_captionString = ""; //$NON-NLS-1$
 	private boolean m_disableSelectionUpdates = false;
 	/////////////////	
@@ -663,28 +662,20 @@ public class MainView extends ViewPart
 		captionString = captionString + captionStringBuilder.toString().trim();
 		
 		setTargetString(targetString, buildCommand);
-		m_form.setText((isBuildCommandDefault()? "" : "[" + buildCommand + "] ") + targetString);
+		m_form.setText(
+				(getTargetDescription().isDefaultBuildCommand()? "" : "[" + buildCommand + "] ") 
+				+ targetString
+				);
 		setCaptionString(captionString);
 		Plugin.getInstance().setSelectedState(m_currentProject, selectedState);
 	}
 
 	/** result is not null*/
-	public String getTargetString()
+	public TargetDescription getTargetDescription()
 	{
-		return m_targetString;
+		return m_targetDesciption;
 	}
 	
-	/** result can be null, designating a default build command*/
-	public String getBuildCommand()
-	{
-		return m_buildCommand;
-	}
-
-	public boolean isBuildCommandDefault()
-	{
-		return m_buildCommand.isEmpty();
-	}
-
 	/**
 	 * @param targetString cannot be null
 	 * @param buildCommand cannot be null
@@ -699,8 +690,7 @@ public class MainView extends ViewPart
 		{
 			throw new NullPointerException(Messages.Plugin_error4);
 		}
-		m_targetString = targetString;
-		m_buildCommand = buildCommand;
+		m_targetDesciption = new TargetDescription(targetString, buildCommand);
 	}
 
 	/** result is not null*/

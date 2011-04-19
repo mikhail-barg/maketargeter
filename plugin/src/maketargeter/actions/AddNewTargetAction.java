@@ -4,7 +4,6 @@ import maketargeter.MainView;
 import maketargeter.Plugin;
 import maketargeter.Util;
 
-import org.eclipse.cdt.make.core.IMakeCommonBuildInfo;
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
 import org.eclipse.cdt.make.core.MakeCorePlugin;
@@ -38,23 +37,15 @@ public class AddNewTargetAction extends Action
 			return;
 		}
 		
-		final IMakeTargetManager targetManager = MakeCorePlugin.getDefault().getTargetManager();
-		
 		try
 		{
-			final IMakeTarget target = targetManager.createTarget(
+			final IMakeTargetManager targetManager = MakeCorePlugin.getDefault().getTargetManager();
+			final IMakeTarget target = Util.createTarget(
+											targetManager, 
 											project, 
-											getTargetName(targetManager, project, m_view.getCaptionString()), 
-											Util.getTargetBuildId(targetManager, project));
-			target.setStopOnError(true);
-			target.setRunAllBuilders(true);
-			final boolean defaultBuildCommand = m_view.isBuildCommandDefault();
-			target.setUseDefaultBuildCmd(defaultBuildCommand);
-			if (!defaultBuildCommand)
-			{
-				target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, m_view.getBuildCommand());
-			}
-			target.setBuildAttribute(IMakeTarget.BUILD_TARGET, m_view.getTargetString());
+											m_view.getTargetDescription(), 
+											getTargetName(targetManager, project, m_view.getCaptionString())
+											); 
 			targetManager.addTarget(project, target);
 		}
 		catch (CoreException e)

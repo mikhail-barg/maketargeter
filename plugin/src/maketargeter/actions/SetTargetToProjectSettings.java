@@ -2,6 +2,7 @@ package maketargeter.actions;
 
 import maketargeter.MainView;
 import maketargeter.Plugin;
+import maketargeter.TargetDescription;
 
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
@@ -48,7 +49,14 @@ public class SetTargetToProjectSettings extends Action
 		
 		try
 		{
-			configuration.getEditableBuilder().setBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, m_view.getTargetString());
+			TargetDescription targetDescription = m_view.getTargetDescription();
+			
+			//build target
+			configuration.getEditableBuilder().setBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, targetDescription.getTragetCommand());
+			
+			//build command
+			configuration.setBuildCommand(targetDescription.isDefaultBuildCommand()? null : targetDescription.getBuildCommand());
+			
 			CoreModel.getDefault().setProjectDescription(project, projectDescription);
 		}
 		catch (CoreException e)
