@@ -1,7 +1,8 @@
 package maketargeter;
 
 /**
- * Data stored for every target
+ * Data stored for every target in the file
+ * Also used to store the resulting target info
  */
 public class TargetDescription
 {
@@ -28,4 +29,5 @@ public class TargetDescription
 	
 	public String getTragetCommand() { return m_targetCommand; }
 	public String getBuildCommand() { return m_buildCommand; }
+	public boolean isDefaultBuildCommand() { return m_buildCommand.isEmpty(); }
 }

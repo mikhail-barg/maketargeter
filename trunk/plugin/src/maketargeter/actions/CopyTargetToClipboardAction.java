@@ -25,7 +25,7 @@ public class CopyTargetToClipboardAction extends Action
 	@Override
 	public void run()
 	{
-		setToClipboard(m_view.getTargetString());
+		setToClipboard(m_view.getTargetDescription().getTragetCommand());
 	}
 	
 	private void setToClipboard(String text)

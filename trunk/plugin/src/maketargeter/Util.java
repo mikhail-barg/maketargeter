@@ -5,10 +5,13 @@ package maketargeter;
 
 import java.util.Iterator;
 
+import org.eclipse.cdt.make.core.IMakeCommonBuildInfo;
+import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Button;
@@ -23,6 +26,8 @@ import org.eclipse.swt.widgets.Control;
  */
 public class Util
 {
+	/**to prevent external instantiation*/
+	private Util() {}
 
 	/**
 	 * @param project
@@ -154,4 +159,23 @@ public class Util
 	{
 		return file != null && file.exists();
 	}
+	
+	public static IMakeTarget createTarget(IMakeTargetManager targetManager, IProject project, TargetDescription targetDescription, String caption) throws CoreException
+	{
+		final IMakeTarget target = targetManager.createTarget(
+				project, 
+				caption, 
+				getTargetBuildId(targetManager, project));
+		target.setStopOnError(true);
+		target.setRunAllBuilders(true);
+		final boolean defaultBuildCommand = targetDescription.isDefaultBuildCommand();
+		target.setUseDefaultBuildCmd(defaultBuildCommand);
+		if (!defaultBuildCommand)
+		{
+			target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, targetDescription.getBuildCommand());
+		}
+		target.setBuildAttribute(IMakeTarget.BUILD_TARGET, targetDescription.getTragetCommand());
+		return target;
+	}
+
 }

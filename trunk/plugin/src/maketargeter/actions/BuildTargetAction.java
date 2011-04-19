@@ -36,15 +36,15 @@ public class BuildTargetAction extends Action
 			return;
 		}
 		
-		final IMakeTargetManager targetManager = MakeCorePlugin.getDefault().getTargetManager();
-		
 		try
 		{
-			IMakeTarget target = targetManager.createTarget(project, "Custom target", Util.getTargetBuildId(targetManager, project)); //$NON-NLS-1$
-			target.setStopOnError(true);
-			target.setRunAllBuilders(true);
-			target.setUseDefaultBuildCmd(true);
-			target.setBuildAttribute(IMakeTarget.BUILD_TARGET, m_view.getTargetString());
+			final IMakeTargetManager targetManager = MakeCorePlugin.getDefault().getTargetManager();
+			final IMakeTarget target = Util.createTarget(
+											targetManager, 
+											project, 
+											m_view.getTargetDescription(), 
+											"Custom target"
+											); 
 			TargetBuild.buildTargets(m_shell, new IMakeTarget[] { target });
 		}
 		catch (CoreException e)
