@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -22,6 +24,7 @@ public class Plugin extends AbstractUIPlugin
 	public static final String MT_XML_TARGET_ELEMENT_TEXT_ATTR = "caption"; //$NON-NLS-1$
 	public static final String MT_XML_TARGET_ELEMENT_COMMAND_ATTR = "command"; //$NON-NLS-1$
 	public static final String MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR = "build_command"; //$NON-NLS-1$
+	public static final String MT_XML_TARGET_ELEMENT_BUILD_LOCATION_ATTR = "build_path"; //$NON-NLS-1$
 	public static final String MT_XML_TARGET_ELEMENT_HINT_ATTR = "hint"; //$NON-NLS-1$
 
 	public static final String MT_XML_OPTIONS_SECTION_ELEMENT_NAME = "options"; //$NON-NLS-1$
@@ -88,5 +91,10 @@ public class Plugin extends AbstractUIPlugin
 			return;
 		}
 		m_selectionStorage.put(project, state);
+	}
+	
+	public void logError(String message, Exception e)
+	{
+		getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, e));
 	}
 }

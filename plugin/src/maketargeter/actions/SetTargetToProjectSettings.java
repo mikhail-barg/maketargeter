@@ -53,6 +53,7 @@ public class SetTargetToProjectSettings extends Action
 			
 			//build target
 			configuration.getEditableBuilder().setBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, targetDescription.getTragetCommand());
+			//configuration.getEditableBuilder().setBuildPath(location);
 			
 			//build command
 			configuration.setBuildCommand(targetDescription.isDefaultBuildCommand()? null : targetDescription.getBuildCommand());

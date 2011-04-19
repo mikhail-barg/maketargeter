@@ -8,7 +8,9 @@ import java.util.Iterator;
 import org.eclipse.cdt.make.core.IMakeCommonBuildInfo;
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -176,6 +178,23 @@ public class Util
 		}
 		target.setBuildAttribute(IMakeTarget.BUILD_TARGET, targetDescription.getTragetCommand());
 		return target;
+	}
+	
+	public static IContainer getBuildContainerForTarget(IProject project, TargetDescription targetDescription)
+	{
+		if (targetDescription.isDefaultBuildLocation())
+		{
+			return project;
+		}
+		
+		IFolder folder = project.getFolder(targetDescription.getBuildLocation());
+		if (!folder.exists())
+		{
+			String message = "The specified build path does not exist :" + folder;
+			Plugin.getInstance().logError(message, null);
+			throw new IllegalArgumentException(message);
+		}
+		return folder;
 	}
 
 }

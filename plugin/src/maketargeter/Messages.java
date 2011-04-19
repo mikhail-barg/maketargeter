@@ -17,6 +17,7 @@ public class Messages extends NLS
 	public static String Plugin_error2;
 	public static String Plugin_error3;
 	public static String Plugin_error4;
+	public static String Plugin_error5;
 	static
 	{
 		// initialize resource bundle

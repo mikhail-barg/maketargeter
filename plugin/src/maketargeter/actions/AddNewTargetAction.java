@@ -2,6 +2,7 @@ package maketargeter.actions;
 
 import maketargeter.MainView;
 import maketargeter.Plugin;
+import maketargeter.TargetDescription;
 import maketargeter.Util;
 
 import org.eclipse.cdt.make.core.IMakeTarget;
@@ -40,17 +41,18 @@ public class AddNewTargetAction extends Action
 		try
 		{
 			final IMakeTargetManager targetManager = MakeCorePlugin.getDefault().getTargetManager();
+			final TargetDescription targetDescription = m_view.getTargetDescription(); 
 			final IMakeTarget target = Util.createTarget(
 											targetManager, 
-											project, 
-											m_view.getTargetDescription(), 
+											project,
+											targetDescription,
 											getTargetName(targetManager, project, m_view.getCaptionString())
-											); 
-			targetManager.addTarget(project, target);
+											);
+			targetManager.addTarget(Util.getBuildContainerForTarget(project, targetDescription), target);
 		}
 		catch (CoreException e)
 		{
-			e.printStackTrace();
+			Plugin.getInstance().logError(e.getMessage(), e);
 		}
 	}
 
