@@ -4,6 +4,7 @@ import maketargeter.MainView;
 import maketargeter.Plugin;
 import maketargeter.Util;
 
+import org.eclipse.cdt.make.core.IMakeCommonBuildInfo;
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
 import org.eclipse.cdt.make.core.MakeCorePlugin;
@@ -47,7 +48,12 @@ public class AddNewTargetAction extends Action
 											Util.getTargetBuildId(targetManager, project));
 			target.setStopOnError(true);
 			target.setRunAllBuilders(true);
-			target.setUseDefaultBuildCmd(true);
+			final boolean defaultBuildCommand = m_view.isBuildCommandDefault();
+			target.setUseDefaultBuildCmd(defaultBuildCommand);
+			if (!defaultBuildCommand)
+			{
+				target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, m_view.getBuildCommand());
+			}
 			target.setBuildAttribute(IMakeTarget.BUILD_TARGET, m_view.getTargetString());
 			targetManager.addTarget(project, target);
 		}
