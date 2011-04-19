@@ -113,6 +113,10 @@ public class Util
 		}
 	}
 	
+	static boolean isButtonSelected(Button button)
+	{
+		return (button != null && button.getSelection() && button.getData() != null);
+	}
 	
 	public static String getTargetBuildId(IMakeTargetManager targetManager, IProject project)
 	{

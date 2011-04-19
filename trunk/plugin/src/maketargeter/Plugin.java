@@ -21,6 +21,7 @@ public class Plugin extends AbstractUIPlugin
 	public static final String MT_XML_TARGET_ELEMENT_NAME = "target"; //$NON-NLS-1$
 	public static final String MT_XML_TARGET_ELEMENT_TEXT_ATTR = "caption"; //$NON-NLS-1$
 	public static final String MT_XML_TARGET_ELEMENT_COMMAND_ATTR = "command"; //$NON-NLS-1$
+	public static final String MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR = "build_command"; //$NON-NLS-1$
 	public static final String MT_XML_TARGET_ELEMENT_HINT_ATTR = "hint"; //$NON-NLS-1$
 
 	public static final String MT_XML_OPTIONS_SECTION_ELEMENT_NAME = "options"; //$NON-NLS-1$
