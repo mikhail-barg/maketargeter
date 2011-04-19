@@ -122,6 +122,7 @@ public class MainView extends ViewPart
 	private IProject m_parsingProject;
 	private IProject m_wantedProject;
 	private String m_targetString = ""; //$NON-NLS-1$
+	private String m_buildCommand = ""; //$NON-NLS-1$
 	private String m_captionString = ""; //$NON-NLS-1$
 	private boolean m_disableSelectionUpdates = false;
 	/////////////////	
@@ -521,7 +522,10 @@ public class MainView extends ViewPart
 			final Element target = (Element) targets.item(i);
 			addButton(m_targetsGroup, true, 
 						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR),
-						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR),
+						new TargetDescription(
+								target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR), 
+								target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR)
+								),
 						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR)
 						);
 		}
@@ -582,10 +586,10 @@ public class MainView extends ViewPart
 		m_optionGroupsList.add(group);
 	}
 	
-	private Button addButton(Composite groupControl, boolean isRadio, String caption, String command, String hint)
+	private Button addButton(Composite groupControl, boolean isRadio, String caption, Object data, String hint)
 	{
 		final Button button = m_toolkit.createButton(groupControl, caption, isRadio? SWT.RADIO : SWT.CHECK);
-		button.setData(command);
+		button.setData(data);
 		button.setToolTipText(hint);
 		button.addSelectionListener(m_buttonSelectionListener);
 		return button;
@@ -613,12 +617,13 @@ public class MainView extends ViewPart
 		final StringBuilder targetStringBuilder = new StringBuilder();
 		final StringBuilder captionStringBuilder = new StringBuilder();
 		String captionString = "";  //$NON-NLS-1$
+		String buildCommand = null;
 
 		// options
 		{
 			for (Button button : m_optionButtonsList)
 			{
-				if (isButtonSelected(button))
+				if (Util.isButtonSelected(button))
 				{
 					targetStringBuilder.append(button.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
 					captionStringBuilder.append(button.getText()).append(Plugin.MT_CAPTION_LINE_SEPARATOR);
@@ -632,7 +637,7 @@ public class MainView extends ViewPart
 			for (Group group : m_optionGroupsList)
 			{
 				final Button selectedButton = Util.getSelectedRadioButton(group);
-				if (isButtonSelected(selectedButton))
+				if (Util.isButtonSelected(selectedButton))
 				{
 					targetStringBuilder.append(selectedButton.getData().toString()).append(Plugin.MT_TARGET_LINE_SEPARATOR);
 					captionStringBuilder.append(selectedButton.getText()).append(Plugin.MT_CAPTION_LINE_SEPARATOR);
@@ -644,9 +649,11 @@ public class MainView extends ViewPart
 		// target
 		{
 			final Button selectedButton = Util.getSelectedRadioButton(m_targetsGroup);
-			if (isButtonSelected(selectedButton))
+			if (Util.isButtonSelected(selectedButton))
 			{
-				targetStringBuilder.append(selectedButton.getData().toString());
+				TargetDescription descr = (TargetDescription) selectedButton.getData();
+				targetStringBuilder.append(descr.getTragetCommand());
+				buildCommand = descr.getBuildCommand();
 				captionString = selectedButton.getText() + Plugin.MT_CAPTION_LINE_SEPARATOR;
 				selectedState.setSelectedTarget(selectedButton.getText());
 			}
@@ -655,31 +662,45 @@ public class MainView extends ViewPart
 		String targetString = targetStringBuilder.toString().trim();
 		captionString = captionString + captionStringBuilder.toString().trim();
 		
-		m_form.setText(targetString);
-		setTargetString(targetString);
+		setTargetString(targetString, buildCommand);
+		m_form.setText((isBuildCommandDefault()? "" : "[" + buildCommand + "] ") + targetString);
 		setCaptionString(captionString);
 		Plugin.getInstance().setSelectedState(m_currentProject, selectedState);
 	}
 
-	private boolean isButtonSelected(Button button)
-	{
-		return (button != null && button.getSelection() && button.getData() != null);
-	}
-	
 	/** result is not null*/
 	public String getTargetString()
 	{
 		return m_targetString;
 	}
 	
-	/** param cannot be null*/
-	void setTargetString(String string)
+	/** result can be null, designating a default build command*/
+	public String getBuildCommand()
 	{
-		if (string == null)
+		return m_buildCommand;
+	}
+
+	public boolean isBuildCommandDefault()
+	{
+		return m_buildCommand.isEmpty();
+	}
+
+	/**
+	 * @param targetString cannot be null
+	 * @param buildCommand cannot be null
+	 */
+	void setTargetString(String targetString, String buildCommand)
+	{
+		if (targetString == null)
 		{
 			throw new NullPointerException(Messages.Plugin_error2);
 		}
-		m_targetString = string;
+		if (buildCommand == null)
+		{
+			throw new NullPointerException(Messages.Plugin_error4);
+		}
+		m_targetString = targetString;
+		m_buildCommand = buildCommand;
 	}
 
 	/** result is not null*/
@@ -702,6 +723,5 @@ public class MainView extends ViewPart
 	{
 		return m_currentProject;
 	}
-	
 }
 
