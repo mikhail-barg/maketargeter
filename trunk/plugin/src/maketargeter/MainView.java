@@ -523,7 +523,8 @@ public class MainView extends ViewPart
 						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR),
 						new TargetDescription(
 								target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR), 
-								target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR)
+								target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR),
+								target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_LOCATION_ATTR)
 								),
 						target.getAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR)
 						);
@@ -617,6 +618,7 @@ public class MainView extends ViewPart
 		final StringBuilder captionStringBuilder = new StringBuilder();
 		String captionString = "";  //$NON-NLS-1$
 		String buildCommand = null;
+		String buildLocation = null;
 
 		// options
 		{
@@ -653,6 +655,7 @@ public class MainView extends ViewPart
 				TargetDescription descr = (TargetDescription) selectedButton.getData();
 				targetStringBuilder.append(descr.getTragetCommand());
 				buildCommand = descr.getBuildCommand();
+				buildLocation = descr.getBuildLocation();
 				captionString = selectedButton.getText() + Plugin.MT_CAPTION_LINE_SEPARATOR;
 				selectedState.setSelectedTarget(selectedButton.getText());
 			}
@@ -661,9 +664,10 @@ public class MainView extends ViewPart
 		String targetString = targetStringBuilder.toString().trim();
 		captionString = captionString + captionStringBuilder.toString().trim();
 		
-		setTargetString(targetString, buildCommand);
+		setTargetString(targetString, buildCommand, buildLocation);
 		m_form.setText(
-				(getTargetDescription().isDefaultBuildCommand()? "" : "[" + buildCommand + "] ") 
+				(getTargetDescription().isDefaultBuildCommand()? "" : "[" + buildCommand + "] ")
+				+ (getTargetDescription().isDefaultBuildLocation()? "" : "{" + buildLocation + "} ")
 				+ targetString
 				);
 		setCaptionString(captionString);
@@ -679,8 +683,9 @@ public class MainView extends ViewPart
 	/**
 	 * @param targetString cannot be null
 	 * @param buildCommand cannot be null
+	 * @param buildLocation cannot be null
 	 */
-	void setTargetString(String targetString, String buildCommand)
+	void setTargetString(String targetString, String buildCommand, String buildLocation)
 	{
 		if (targetString == null)
 		{
@@ -690,7 +695,11 @@ public class MainView extends ViewPart
 		{
 			throw new NullPointerException(Messages.Plugin_error4);
 		}
-		m_targetDesciption = new TargetDescription(targetString, buildCommand);
+		if (buildLocation == null)
+		{
+			throw new NullPointerException(Messages.Plugin_error5);
+		}
+		m_targetDesciption = new TargetDescription(targetString, buildCommand, buildLocation);
 	}
 
 	/** result is not null*/

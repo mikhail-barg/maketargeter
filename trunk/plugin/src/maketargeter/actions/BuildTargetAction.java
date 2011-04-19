@@ -2,6 +2,7 @@ package maketargeter.actions;
 
 import maketargeter.MainView;
 import maketargeter.Plugin;
+import maketargeter.TargetDescription;
 import maketargeter.Util;
 
 import org.eclipse.cdt.make.core.IMakeTarget;
@@ -39,12 +40,14 @@ public class BuildTargetAction extends Action
 		try
 		{
 			final IMakeTargetManager targetManager = MakeCorePlugin.getDefault().getTargetManager();
+			final TargetDescription targetDescription = m_view.getTargetDescription(); 
 			final IMakeTarget target = Util.createTarget(
 											targetManager, 
 											project, 
-											m_view.getTargetDescription(), 
+											targetDescription, 
 											"Custom target"
 											); 
+			target.setContainer(Util.getBuildContainerForTarget(project, targetDescription));
 			TargetBuild.buildTargets(m_shell, new IMakeTarget[] { target });
 		}
 		catch (CoreException e)
