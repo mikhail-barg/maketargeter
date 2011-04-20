@@ -155,7 +155,7 @@ public class MainView extends ViewPart
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					onSelectionChanged();
+					onSelectionChanged(m_currentProject);
 				}
 			};
 		
@@ -420,7 +420,7 @@ public class MainView extends ViewPart
 			m_disableSelectionUpdates = false;
 		}
 		
-		onSelectionChanged();
+		onSelectionChanged(m_parsingProject);	//currently m_currentProject is null, but it's a good idea to store selection
 	}
 	
 	/**
@@ -449,7 +449,7 @@ public class MainView extends ViewPart
 				throw new IllegalArgumentException(Messages.MainView_error1_1 + rootElement.getNodeName() + Messages.MainView_error1_2 + Plugin.MT_XML_ROOT_ELEMENT_NAME + Messages.MainView_error1_3);
 			}
 
-			ISelectedStateData selectedState = Plugin.getInstance().getSelectedState(m_currentProject);
+			ISelectedStateData selectedState = Plugin.getInstance().getSelectedState(m_parsingProject);
 			
 			// targets sections
 			{
@@ -606,7 +606,7 @@ public class MainView extends ViewPart
 		return group;
 	}
 
-	private void onSelectionChanged()
+	private void onSelectionChanged(IProject projectToStoreSelection)
 	{
 		if (m_disableSelectionUpdates)
 		{
