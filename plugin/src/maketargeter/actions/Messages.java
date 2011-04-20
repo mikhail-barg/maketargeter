@@ -23,6 +23,8 @@ public class Messages extends NLS
 	public static String AddTargetsFileAction_def_target2_comment;
 	public static String AddTargetsFileAction_def_target3;
 	public static String AddTargetsFileAction_def_target3_comment;
+	public static String AddTargetsFileAction_def_target4;
+	public static String AddTargetsFileAction_def_target4_comment;
 	public static String AddTargetsFileAction_error_bad_targets_file;
 	public static String AddTargetsFileAction_error_failed_to_create_targets_file;
 	public static String AddTargetsFileAction_error_failed_to_save_targets_file;
