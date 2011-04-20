@@ -3,6 +3,7 @@ package maketargeter.actions;
 import maketargeter.MainView;
 import maketargeter.Plugin;
 import maketargeter.TargetDescription;
+import maketargeter.Util;
 
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
@@ -53,7 +54,10 @@ public class SetTargetToProjectSettings extends Action
 			
 			//build target
 			configuration.getEditableBuilder().setBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, targetDescription.getTragetCommand());
-			//configuration.getEditableBuilder().setBuildPath(location);
+			configuration.getEditableBuilder().setBuildPath(
+					targetDescription.isDefaultBuildLocation()? 
+							null 
+							: Util.getBuildContainerForTarget(project, targetDescription).getFullPath().toString());
 			
 			//build command
 			configuration.setBuildCommand(targetDescription.isDefaultBuildCommand()? null : targetDescription.getBuildCommand());

@@ -186,9 +186,16 @@ public class AddTargetsFileAction extends Action
 				
 				target = doc.createElement(Plugin.MT_XML_TARGET_ELEMENT_NAME);
 				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_target3);
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "custom"); //$NON-NLS-1$
-				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR, "true"); //$NON-NLS-1$
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "build"); //$NON-NLS-1$
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_COMMAND_ATTR, "echo"); //$NON-NLS-1$
 				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_target3_comment);
+				targetsSection.appendChild(target);
+
+				target = doc.createElement(Plugin.MT_XML_TARGET_ELEMENT_NAME);
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_TEXT_ATTR, Messages.AddTargetsFileAction_def_target4);
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_COMMAND_ATTR, "build"); //$NON-NLS-1$
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_BUILD_LOCATION_ATTR, "some/local/path"); //$NON-NLS-1$
+				target.setAttribute(Plugin.MT_XML_TARGET_ELEMENT_HINT_ATTR, Messages.AddTargetsFileAction_def_target4_comment);
 				targetsSection.appendChild(target);
 			}
 
