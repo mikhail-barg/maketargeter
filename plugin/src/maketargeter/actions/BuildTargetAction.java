@@ -45,7 +45,7 @@ public class BuildTargetAction extends Action
 											targetManager, 
 											project, 
 											targetDescription, 
-											"Custom target"
+											"Custom target" //$NON-NLS-1$
 											); 
 			target.setContainer(Util.getBuildContainerForTarget(project, targetDescription));
 			TargetBuild.buildTargets(m_shell, new IMakeTarget[] { target });
