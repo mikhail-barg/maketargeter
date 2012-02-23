@@ -311,6 +311,19 @@ public class MainView extends ViewPart
 		scheduleUpdate(project, false);
 	}
 	
+	public void updateTardetsDescriptionText()
+	{
+		updateTardetsDescriptionText(getCurrentProject());
+	}
+	
+	private void updateTardetsDescriptionText(IProject project)
+	{
+		m_form.setText(
+				"Project settings: " + constructDispayTargetString(Util.getTargetDescriptionFromProject(project))
+				+ "\n"
+				+ "Make Targeter: " + constructDispayTargetString(getTargetDescription()));
+	}
+	
 	private void scheduleUpdate(IProject newProject, boolean forceReparse)
 	{
 		final Job job = new UpdateJob(this, newProject, forceReparse);
@@ -667,11 +680,21 @@ public class MainView extends ViewPart
 		captionString = captionString + captionStringBuilder.toString().trim();
 		
 		setTargetString(targetString, buildCommand, buildLocation);
-		m_form.setText(constructDispayTargetString(targetString, buildCommand, buildLocation));
 		setCaptionString(captionString);
-		Plugin.getInstance().setSelectedState(m_currentProject, selectedState);
+		
+		Plugin.getInstance().setSelectedState(projectToStoreSelection, selectedState);
+		
+		updateTardetsDescriptionText(projectToStoreSelection);	//this is because m_currentProject is not set yet
 	}
 	
+	private String constructDispayTargetString(TargetDescription targetDescr)
+	{
+		if (targetDescr == null)
+		{
+			return "";
+		}
+		return constructDispayTargetString(targetDescr.getTragetCommand(), targetDescr.getBuildCommand(), targetDescr.getBuildLocation());
+	}
 	private String constructDispayTargetString(String targetString, String buildCommand, String buildLocation)
 	{
 		return (buildLocation.isEmpty()? "" : "{" + buildLocation + "} ") 

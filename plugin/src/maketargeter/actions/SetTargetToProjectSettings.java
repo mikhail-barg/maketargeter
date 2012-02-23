@@ -63,6 +63,8 @@ public class SetTargetToProjectSettings extends Action
 			configuration.setBuildCommand(targetDescription.isDefaultBuildCommand()? null : targetDescription.getBuildCommand());
 			
 			CoreModel.getDefault().setProjectDescription(project, projectDescription);
+			
+			m_view.updateTardetsDescriptionText();
 		}
 		catch (CoreException e)
 		{
