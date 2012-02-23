@@ -5,9 +5,15 @@ package maketargeter;
 
 import java.util.Iterator;
 
+import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.make.core.IMakeCommonBuildInfo;
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
+import org.eclipse.cdt.managedbuilder.core.IBuilder;
+import org.eclipse.cdt.managedbuilder.core.IConfiguration;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
+import org.eclipse.cdt.newmake.core.IMakeBuilderInfo;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -197,4 +203,29 @@ public class Util
 		return folder;
 	}
 
+	public static TargetDescription getTargetDescriptionFromProject(IProject project)
+	{
+		if (project == null)
+		{
+			return null;
+		}
+		
+		final ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project);
+		if (projectDescription == null)
+		{
+			throw new RuntimeException("Failed to get a description for the project '" + project + "'");
+		}
+		
+		final IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
+		final IBuilder builder = configuration.getBuilder(); 
+		String targetCommand = builder.getBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, "");
+		String buildLocation = builder.getBuildAttribute(IBuilder.BUILD_LOCATION, "");
+		String buildCommand = configuration.getBuildCommand();
+		if (buildCommand == null || builder.isDefaultBuildCmd())
+		{
+			buildCommand = "";
+		}
+		
+		return new TargetDescription(targetCommand, buildCommand, buildLocation);
+	}
 }
