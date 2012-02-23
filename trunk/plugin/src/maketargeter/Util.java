@@ -196,7 +196,7 @@ public class Util
 		IFolder folder = project.getFolder(targetDescription.getBuildLocation());
 		if (!folder.exists())
 		{
-			String message = "The specified build path does not exist :" + folder;
+			String message = "The specified build path does not exist :" + folder; //$NON-NLS-1$
 			Plugin.getInstance().logError(message, null);
 			throw new IllegalArgumentException(message);
 		}
@@ -213,17 +213,17 @@ public class Util
 		final ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project);
 		if (projectDescription == null)
 		{
-			throw new RuntimeException("Failed to get a description for the project '" + project + "'");
+			throw new RuntimeException("Failed to get a description for the project '" + project + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		final IConfiguration configuration = ManagedBuildManager.getConfigurationForDescription(projectDescription.getActiveConfiguration());
 		final IBuilder builder = configuration.getBuilder(); 
-		String targetCommand = builder.getBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, "");
-		String buildLocation = builder.getBuildAttribute(IBuilder.BUILD_LOCATION, "");
+		String targetCommand = builder.getBuildAttribute(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, ""); //$NON-NLS-1$
+		String buildLocation = builder.getBuildAttribute(IBuilder.BUILD_LOCATION, ""); //$NON-NLS-1$
 		String buildCommand = configuration.getBuildCommand();
 		if (buildCommand == null || builder.isDefaultBuildCmd())
 		{
-			buildCommand = "";
+			buildCommand = ""; //$NON-NLS-1$
 		}
 		
 		return new TargetDescription(targetCommand, buildCommand, buildLocation);

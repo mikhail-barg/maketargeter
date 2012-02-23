@@ -319,9 +319,9 @@ public class MainView extends ViewPart
 	private void updateTardetsDescriptionText(IProject project)
 	{
 		m_form.setText(
-				"Project settings: " + constructDispayTargetString(Util.getTargetDescriptionFromProject(project))
-				+ "\n"
-				+ "Make Targeter: " + constructDispayTargetString(getTargetDescription()));
+				Messages.MainView_MainView_TargetDescription_1 + constructDispayTargetString(Util.getTargetDescriptionFromProject(project))
+				+ "\n" //$NON-NLS-1$
+				+ Messages.MainView_MainView_TargetDescription_2 + constructDispayTargetString(getTargetDescription()));
 	}
 	
 	private void scheduleUpdate(IProject newProject, boolean forceReparse)
@@ -691,14 +691,14 @@ public class MainView extends ViewPart
 	{
 		if (targetDescr == null)
 		{
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		return constructDispayTargetString(targetDescr.getTragetCommand(), targetDescr.getBuildCommand(), targetDescr.getBuildLocation());
 	}
 	private String constructDispayTargetString(String targetString, String buildCommand, String buildLocation)
 	{
-		return (buildLocation.isEmpty()? "" : "{" + buildLocation + "} ") 
-				+ (buildCommand.isEmpty()? "" : "[" + buildCommand + "] ")
+		return (buildLocation.isEmpty()? Messages.MainView_MainView_TargetDescription_BuildLocationDefault : Messages.MainView_MainView_TargetDescription_BuildLocationBegin + buildLocation + Messages.MainView_MainView_TargetDescription_BuildLocationEnd) 
+				+ (buildCommand.isEmpty()? Messages.MainView_MainView_TargetDescription_BuildCommandDefault : Messages.MainView_MainView_TargetDescription_BuildCommandBegin + buildCommand + Messages.MainView_MainView_TargetDescription_BuildCommandEnd)
 				+ targetString;
 	}
 

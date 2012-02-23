@@ -8,6 +8,14 @@ public class Messages extends NLS
 	public static String MainView_error1_1;
 	public static String MainView_error1_2;
 	public static String MainView_error1_3;
+	public static String MainView_MainView_TargetDescription_1;
+	public static String MainView_MainView_TargetDescription_2;
+	public static String MainView_MainView_TargetDescription_BuildCommandBegin;
+	public static String MainView_MainView_TargetDescription_BuildCommandDefault;
+	public static String MainView_MainView_TargetDescription_BuildCommandEnd;
+	public static String MainView_MainView_TargetDescription_BuildLocationBegin;
+	public static String MainView_MainView_TargetDescription_BuildLocationDefault;
+	public static String MainView_MainView_TargetDescription_BuildLocationEnd;
 	public static String MainView_no_project;
 	public static String MainView_options_section;
 	public static String MainView_targets_section;
