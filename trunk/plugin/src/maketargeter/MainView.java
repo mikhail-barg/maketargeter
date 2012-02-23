@@ -59,7 +59,7 @@ import org.xml.sax.SAXException;
  */
 public class MainView extends ViewPart
 {
-////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////
 	private static class UpdateJob extends Job
 	{
 		private final IProject m_newProject;
@@ -116,6 +116,7 @@ public class MainView extends ViewPart
 		 */
 		STATE_UPDATING,
 	}
+	/////////////////
 	
 	private State m_state = State.STATE_ACTUAL;
 	private final Object m_stateLock = new Object();	//an object to lock on for updating the value of the m_state
@@ -666,13 +667,16 @@ public class MainView extends ViewPart
 		captionString = captionString + captionStringBuilder.toString().trim();
 		
 		setTargetString(targetString, buildCommand, buildLocation);
-		m_form.setText(
-				(getTargetDescription().isDefaultBuildCommand()? "" : "[" + buildCommand + "] ")
-				+ (getTargetDescription().isDefaultBuildLocation()? "" : "{" + buildLocation + "} ")
-				+ targetString
-				);
+		m_form.setText(constructDispayTargetString(targetString, buildCommand, buildLocation));
 		setCaptionString(captionString);
 		Plugin.getInstance().setSelectedState(m_currentProject, selectedState);
+	}
+	
+	private String constructDispayTargetString(String targetString, String buildCommand, String buildLocation)
+	{
+		return (buildLocation.isEmpty()? "" : "{" + buildLocation + "} ") 
+				+ (buildCommand.isEmpty()? "" : "[" + buildCommand + "] ")
+				+ targetString;
 	}
 
 	/** result is not null*/
