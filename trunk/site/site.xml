@@ -3,7 +3,7 @@
    <description name="MakeTargeter plugin update site" url="http://maketargeter.sourceforge.net/updates">
       The MakeTargeter plugin for Eclipse/CDT update site
    </description>
-   <feature url="features/maketargeter.feature_1.2.0.jar" id="maketargeter.feature" version="1.2.0">
+   <feature url="features/maketargeter.feature_1.2.1.jar" id="maketargeter.feature" version="1.2.1">
       <category name="maketargeter.category"/>
    </feature>
    <category-def name="maketargeter.category" label="MakeTargeter">

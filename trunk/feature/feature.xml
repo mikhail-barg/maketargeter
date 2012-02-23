@@ -2,7 +2,7 @@
 <feature
       id="maketargeter.feature"
       label="MakeTargeter"
-      version="1.2.0"
+      version="1.2.1"
       provider-name="Mikhail Barg">
 
    <description url="http://maketargeter.sourceforge.net/">
