@@ -118,6 +118,7 @@ public class MainView extends ViewPart
 	}
 	
 	private State m_state = State.STATE_ACTUAL;
+	private final Object m_stateLock = new Object();	//an object to lock on for updating the value of the m_state
 	private IProject m_currentProject;
 	private IProject m_parsingProject;
 	private IProject m_wantedProject;
@@ -320,7 +321,7 @@ public class MainView extends ViewPart
 	 */
 	private void update(IProject newProject, boolean forceReparse)
 	{
-		synchronized (m_state)
+		synchronized (m_stateLock)
 		{
 			//System.out.println("update[" + m_state + "] (" + newProject + ", " + forceReparse + ")");
 			switch (m_state)
@@ -382,7 +383,7 @@ public class MainView extends ViewPart
 		finally
 		{
 			IProject restartWithProject = null; 
-			synchronized (m_state)
+			synchronized (m_stateLock)
 			{
 				m_currentProject = m_parsingProject;
 				m_parsingProject = null;
